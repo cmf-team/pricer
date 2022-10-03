@@ -8,6 +8,8 @@ __pycache__/
 
 # JetBrains folders
 .idea
+.idea/misc.xml
+.idea/pricer.iml
 
 # Distribution / packaging
 .Python
