@@ -93,7 +93,7 @@ class Autocall():
 
 
 if __name__ == '__main__':
-    pricer = PricerAutocall(
+    pricer = Autocall(
         1,
         10,
         [[1, 1.1, 0.9, 0.95], [0.5, 0.5, 0.5, 0.5], [1.0, 1.3, 1.5, 1.6],
