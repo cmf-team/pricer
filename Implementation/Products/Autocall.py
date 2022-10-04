@@ -1,7 +1,7 @@
 import Pricer
 
 
-class PricerAutocall():
+class Autocall():
 
     def __init__(
         self,
