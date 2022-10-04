@@ -1,13 +1,13 @@
 import Pricer
 
 
-class PricerAutocall(Pricer):
+class PricerAutocall():
 
     def __init__(
         self,
         notional,
         percent: int,
-        underlying_assets,
+        underlyingAssets,
         ab: float,
         cb: float
     ):
@@ -17,27 +17,27 @@ class PricerAutocall(Pricer):
 
         :param notional: ???
         :param percent: ???
-        :param underlying_assets: underlying assets in current portfolio,\n
-        where in underlying_assets[j][i] j is for underlying, `i` is for time\n
+        :param underlyingAssets: underlying assets in current portfolio,\n
+        where in underlyingAssets[j][i] j is for underlying, `i` is for time\n
         from t_0, ..., t_i,..., t_n
         :param ab: ???
         :param cb: ???
         """
         self.notional = notional
         self.percent = percent
-        self.underlying_assets = underlying_assets
+        self.underlyingAssets = underlyingAssets
         self.ab = ab
         self.cb = cb
-        self.normalized_underlying_assets = [
-            [0] * len(self.underlying_assets[0]) for i in range(
-                len(self.underlying_assets)
+        self.normalizedUnderlyingAssets = [
+            [0] * len(self.underlyingAssets[0]) for i in range(
+                len(self.underlyingAssets)
             )
         ]
 
-        for j in range(0, len(self.underlying_assets)):
-            for i in range(0, len(self.underlying_assets[j])):
-                self.normalized_underlying_assets[j][i] = \
-                    self.underlying_assets[j][i] / self.underlying_assets[j][0]
+        for j in range(0, len(self.underlyingAssets)):
+            for i in range(0, len(self.underlyingAssets[j])):
+                self.normalizedUnderlyingAssets[j][i] = \
+                    self.underlyingAssets[j][i] / self.underlyingAssets[j][0]
 
     def coupon(self, i: int):
         """
@@ -46,22 +46,22 @@ class PricerAutocall(Pricer):
         :param i: ith time index
         :return: value of coupon at time moment t_i
         """
-        temp_min = self.normalized_underlying_assets[0][i]
-        temp_max = self.normalized_underlying_assets[0][0]
+        tempMin = self.normalizedUnderlyingAssets[0][i]
+        tempMax = self.normalizedUnderlyingAssets[0][0]
 
-        for j in range(1, len(self.normalized_underlying_assets)):
-            if self.normalized_underlying_assets[j][i] < temp_min:
-                temp_min = self.normalized_underlying_assets[j][i]
+        for j in range(1, len(self.normalizedUnderlyingAssets)):
+            if self.normalizedUnderlyingAssets[j][i] < tempMin:
+                tempMin = self.normalizedUnderlyingAssets[j][i]
 
-        for j in range(0, len(self.normalized_underlying_assets)):
+        for j in range(0, len(self.normalizedUnderlyingAssets)):
             for k in range(0, i):
-                if self.normalized_underlying_assets[j][k] > temp_max:
-                    temp_max = self.normalized_underlying_assets[j][k]
+                if self.normalizedUnderlyingAssets[j][k] > tempMax:
+                    tempMax = self.normalizedUnderlyingAssets[j][k]
 
-        print(self.normalized_underlying_assets)
-        print(temp_min, temp_max)
+        print(self.normalizedUnderlyingAssets)
+        print(tempMin, tempMax)
 
-        if temp_min >= self.cb and temp_max <= self.ab:
+        if tempMin >= self.cb and tempMax <= self.ab:
             return self.notional * self.percent / 100
         else:
             return 0
@@ -72,21 +72,21 @@ class PricerAutocall(Pricer):
 
         :return: ???
         """
-        temp_min = self.normalized_underlying_assets[0][-1]
-        temp_max = self.normalized_underlying_assets[0][0]
+        tempMin = self.normalizedUnderlyingAssets[0][-1]
+        tempMax = self.normalizedUnderlyingAssets[0][0]
 
-        for j in range(1, len(self.normalized_underlying_assets)):
-            if self.normalized_underlying_assets[j][-1] < temp_min:
-                temp_min = self.normalized_underlying_assets[j][-1]
+        for j in range(1, len(self.normalizedUnderlyingAssets)):
+            if self.normalizedUnderlyingAssets[j][-1] < tempMin:
+                tempMin = self.normalizedUnderlyingAssets[j][-1]
 
-        for j in range(0, len(self.normalized_underlying_assets)):
-            for k in range(0, len(self.normalized_underlying_assets[0]) - 1):
-                if self.normalized_underlying_assets[j][k] > temp_max:
-                    temp_max = self.normalized_underlying_assets[j][k]
+        for j in range(0, len(self.normalizedUnderlyingAssets)):
+            for k in range(0, len(self.normalizedUnderlyingAssets[0]) - 1):
+                if self.normalizedUnderlyingAssets[j][k] > tempMax:
+                    tempMax = self.normalizedUnderlyingAssets[j][k]
 
-        print(temp_min, temp_max)
+        print(tempMin, tempMax)
 
-        if temp_min >= self.cb and temp_max <= self.ab:
+        if tempMin >= self.cb and tempMax <= self.ab:
             return self.notional
         else:
             return 0
