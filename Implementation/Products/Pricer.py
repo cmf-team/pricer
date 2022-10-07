@@ -22,7 +22,7 @@ class Pricer(ABC):
         underlying: str,
         strike: float,
         maturityDate: date
-        ) -> float:
+    ) -> float:
         pass
 
     @abstractmethod
