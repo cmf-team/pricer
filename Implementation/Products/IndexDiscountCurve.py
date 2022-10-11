@@ -1,8 +1,7 @@
 import abc
+import math
 from datetime import date
 from typing import List
-
-import numpy as np
 
 from QuoteProvider import QuoteProvider
 
@@ -53,9 +52,8 @@ class IndexDiscountCurve(DiscountCurve):
             if t > self.durations[i] or len(self.durations) == 1:
                 rate = self.interpolate(t, i)
                 break
-        
-        print(rate)
-        discontFactor = np.exp(-rate*t)
+
+        discontFactor = math.exp(-rate*t)
         return discontFactor
     
     def interpolate(self, t, i):
