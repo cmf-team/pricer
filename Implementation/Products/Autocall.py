@@ -72,9 +72,7 @@ class Autocall(CashFlow):
             ]
         )
         normalizedQuotes = quotes / quotes[:, 0][:, None]
-        print(normalizedQuotes)
         worstOfNormilizedQuotes = normalizedQuotes[:, 1:].min(axis=0)
-        print(worstOfNormilizedQuotes)
 
         if len(worstOfNormilizedQuotes) == 1:
             alreadyAutocalled = 0
