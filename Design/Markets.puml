@@ -42,7 +42,7 @@ package StructuredProductPricer
         class QuoteInspector
         {
             {static} +create(inspectedObject: QuoteProvider)
-            +plotQuotes(tickers: String[0..1], startDate: Date, endDate)
+            +plotQuotes(tickers: String[0..1], startDate: Date, endDate: Date)
         }
     }
 }
