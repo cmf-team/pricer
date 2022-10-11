@@ -1,0 +1,4 @@
+requests==2.28.1
+apimoex==apimoex 1.2.0
+Plotly
+pandas
