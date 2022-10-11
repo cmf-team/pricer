@@ -34,7 +34,23 @@ package StructuredProductPricer
 !endsub
 
 
+!startsub QuoteInspector
+package StructuredProductPricer
+{
+    package Markets
+    {
+        class QuoteInspector
+        {
+            {static} +create(inspectedObject: QuoteProvider)
+            +plotQuotes(tickers: String[0..1], startDate: Date, endDate)
+        }
+    }
+}
+!endsub
+
+
 FinamQuoteProvider -up--|> QuoteProvider
 MoexGCurveQuoteProvider -up--|> QuoteProvider
+QuoteInspector --> "inspectedObject" QuoteProvider
 
 @enduml
