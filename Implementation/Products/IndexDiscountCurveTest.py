@@ -1,8 +1,8 @@
 from unittest import TestCase
 from datetime import date
 from typing import List
-from IndexDiscountCurve import IndexDiscountCurve
-from QuoteProvider import QuoteProvider
+from Products.IndexDiscountCurve import IndexDiscountCurve
+from Products.QuoteProvider import QuoteProvider
 
 
 class QuoteProviderDisc(QuoteProvider):
