@@ -1,12 +1,5 @@
 from Markets.MoexQuoteProvider import MoexQuoteProvider
-from typing import List
-import requests
-import apimoex
-import pandas as pd
 from datetime import date
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
 
 # simple test for getQuotes method
 sampleQuoteObj = MoexQuoteProvider('TQBR')
@@ -19,5 +12,5 @@ for i in range(0, len(sampleDates)):
 
 # simple test for getQuotes method
 sampleChartObj=MoexQuoteProvider('TQBR')
-sampleQuoteObj.getChart('OZON',date(2022,1,1),date(2022,10,10))
-sampleQuoteObj.getChart('MOEX',date(2022,1,1),date(2022,10,10))
+sampleQuoteObj.getChart('GAZP',date(2022,1,1),date(2022,10,10))
+sampleQuoteObj.getChart('SBER',date(2022,1,1),date(2022,10,10))
