@@ -1,9 +1,9 @@
 from datetime import date
 from typing import List, Optional
 
-from CashFlow import CashFlow
-from Pricer import Pricer
-from QuoteProvider import QuoteProvider
+from Products.CashFlow import CashFlow
+from Products.Pricer import Pricer
+from Products.QuoteProvider import QuoteProvider
 
 
 class VanillaStructuredProduct(CashFlow):

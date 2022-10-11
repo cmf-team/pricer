@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from datetime import date
 from typing import List
 
-from QuoteProvider import QuoteProvider
+from Products.QuoteProvider import QuoteProvider
 
 
 class CashFlow(ABC):

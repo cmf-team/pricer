@@ -3,7 +3,7 @@ import math
 from datetime import date
 from typing import List
 
-from QuoteProvider import QuoteProvider
+from Products.QuoteProvider import QuoteProvider
 
 
 class DiscountCurve(abc.ABC):

@@ -2,8 +2,8 @@ from datetime import date
 from typing import List
 from unittest import TestCase
 
-from QuoteProvider import QuoteProvider
-from VanillaStructuredProduct import VanillaStructuredProduct
+from Products.QuoteProvider import QuoteProvider
+from Products.VanillaStructuredProduct import VanillaStructuredProduct
 
 
 class QuoteProviderStub(QuoteProvider):
