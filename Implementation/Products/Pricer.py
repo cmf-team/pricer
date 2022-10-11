@@ -1,6 +1,6 @@
 from datetime import date
 
-from Products.CashFlow import CashFlow
+from CashFlow import CashFlow
 
 
 class Pricer:
