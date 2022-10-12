@@ -32,7 +32,8 @@ class Autocall(CashFlow):
         self.__maturityDate = maturityDate
         self.__observationsFrequency = observationsFrequency
         self.__underlyings = underlyings
-        self.__annulizedCouponLevel = annulizedCouponLevel
+        self.__CouponLevel = annulizedCouponLevel / 12 *\
+                             observationsFrequency.value
         self.__autocallBarrier = autocallBarrier
         self.__couponBarrier = couponBarrier
         self.__allDates = [
@@ -92,7 +93,7 @@ class Autocall(CashFlow):
         if couponCondition and self.__memoryFeature == "AutocallIncremental":
             return 1 + len(
                 worstOfNormilizedQuotes
-            ) * self.__annulizedCouponLevel
+            ) * self.__CouponLevel
         elif couponCondition and self.__memoryFeature == "PhoenixMemory":
             unpaidCouponsNumber = 0
             i = len(worstOfNormilizedQuotes[:-1]) - 1
@@ -103,9 +104,9 @@ class Autocall(CashFlow):
                 unpaidCouponsNumber += 1
                 i -= 1
 
-            coupon = unpaidCouponsNumber * self.__annulizedCouponLevel
+            coupon = unpaidCouponsNumber * self.__CouponLevel
         elif couponCondition and not self.__memoryFeature:
-            coupon = self.__annulizedCouponLevel
+            coupon = self.__CouponLevel
         else:
             coupon = 0
 
