@@ -1,15 +1,12 @@
-# getting quotes with apimoex library
-# apimoex should be installed — https://pypi.org/project/apimoex/
-# installation through terminal — pip install apimoex
-
+import pandas
 from Products.QuoteProvider import QuoteProvider
 from typing import List
 import requests
 import apimoex
 import pandas as pd
+import numpy as np
 from datetime import date
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
+
 
 
 
@@ -17,93 +14,60 @@ class MoexQuoteProvider(QuoteProvider):
     def __init__(
         self,
         boardId: str
-    ): self.__boardId = boardId
+    ):
+        self.__boardId = boardId
 
     def getQuotes(
         self,
         ticker: str,
         observationDates: List[date]
     ) -> List[float]:
-        self.__ticker = ticker
-        self.__startDate: date = min(observationDates)
-        self.__endDate: date = max(observationDates)
-        self.__columns: tuple = ('TRADEDATE', 'CLOSE')
-        self.__pricesList: List[float]
-        self.__observationDates = pd.DataFrame(observationDates)
-        self.__observationDates.columns = ['TRADEDATE']
-        self.__observationDates['TRADEDATE'] = pd.to_datetime(
-        self.__observationDates['TRADEDATE']
+        startDate: date = min(observationDates)
+        endDate: date = max(observationDates)
+        columns: tuple = ('TRADEDATE', 'CLOSE')
+        pricesList: List[float]
+        datesDf = pd.DataFrame(observationDates)
+        datesDf.columns = ['TRADEDATE']
+        datesDf['TRADEDATE'] = pd.to_datetime(
+        datesDf['TRADEDATE']
         )
 
         with requests.Session() as session:
-            self.__quotesData = apimoex.get_board_history(
+            quotesData = apimoex.get_board_history(
                 session,
-                self.__ticker,
-                self.__startDate,
-                self.__endDate,
-                self.__columns,
+                ticker,
+                startDate,
+                endDate,
+                columns,
                 self.__boardId
             )
-            self.__moexDf = pd.DataFrame(self.__quotesData)
-            self.__moexDf['TRADEDATE'] = pd.to_datetime(
-                self.__moexDf['TRADEDATE']
-            )
-            self.__mergedResult = self.__observationDates.merge(
-                right=self.__moexDf,
+            moexDf = pd.DataFrame(quotesData)
+            moexDf['TRADEDATE'] = pd.to_datetime(moexDf['TRADEDATE'])
+            mergedResult = datesDf.merge(
+                right=moexDf,
                 how='left',
-                on='TRADEDATE'
+                on='TRADEDATE',
             )
-            self.__pricesList = self.__mergedResult['CLOSE'].tolist()
-        return self.__pricesList
+            mergedResult['CLOSE'].replace({np.NAN: None}, inplace=True)
+            pricesList = mergedResult['CLOSE'].tolist()
+        return pricesList
 
-    def getChart(
+
+    def getChartQuotes(
         self,
         ticker: str,
         startDate: date,
         endDate: date
-    ):
-        self.__ticker = ticker
-        self.__startDate = startDate
-        self.__endDate = endDate
-        self.__columns: tuple = (
-        'TRADEDATE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME')
+    ) -> pandas.DataFrame:
+        columns: tuple = ('TRADEDATE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME')
         with requests.Session() as session:
-            self.__chartData = apimoex.get_board_history(
+            chartData = apimoex.get_board_history(
                 session,
-                self.__ticker,
-                self.__startDate,
-                self.__endDate,
-                self.__columns,
+                ticker,
+                startDate,
+                endDate,
+                columns,
                 self.__boardId
             )
-            self.__chartDf = pd.DataFrame(self.__chartData)
-            self.__chart = make_subplots(
-                rows=2,
-                cols=1,
-                shared_xaxes=True,
-                vertical_spacing=0.1,
-                subplot_titles=(self.__ticker, 'Volume'),
-                row_width=[0.2, 0.7]
-            )
-            self.__chart.add_trace(
-                go.Candlestick(
-                    x=self.__chartDf['TRADEDATE'],
-                    open=self.__chartDf['OPEN'],
-                    high=self.__chartDf['HIGH'],
-                    low=self.__chartDf['LOW'],
-                    close=self.__chartDf['CLOSE'],
-                    name=self.__ticker
-                ),
-                row=1, col=1
-            )
-            self.__chart.add_trace(
-                go.Bar(
-                    x=self.__chartDf['TRADEDATE'],
-                    y=self.__chartDf['VOLUME'],
-                    showlegend=False
-                ),
-                row=2, col=1
-            )
-            self.__chart.update(layout_xaxis_rangeslider_visible=False)
-            self.__chart.show()
-        pass
+            chartDf = pd.DataFrame(chartData)
+        return chartDf
