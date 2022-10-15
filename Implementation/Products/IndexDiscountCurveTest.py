@@ -14,7 +14,7 @@ class QuoteProviderDisc(QuoteProvider):
         ticker: str,
         observationDates: List[date]
     ) -> List[float]:
-    
+
         if observationDates == [date(2022, 9, 1)]:
             for key in self.__tickerValues.keys():
                 if ticker == key:
@@ -24,30 +24,25 @@ class QuoteProviderDisc(QuoteProvider):
 
 
 class VanillaStructuredProductTest(TestCase):
+    def setUp(self):
+        self.__testedCurve = IndexDiscountCurve(
+            valuationDate=date(2022, 9, 1),
+            tenors=['1D', '1W'],
+            tickers=["RATE1D", "RATE1W"],
+            market=QuoteProviderDisc({'RATE1D': 5.0, 'RATE1W': 10}),
+        )
 
     def testOneTenor(self):
-        self.__testedCurve = IndexDiscountCurve(
-            valuationDate=date(2022, 9, 1),
-            tenors=['1W'],
-            tickers=["GAZP_1W"],
-            market=QuoteProviderDisc({'GAZP_1W': 7.5}),
+        self.assertEqual(0.9992, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 9, 5)), 4)
         )
-        self.assertEqual(0.9992, round(self.__testedCurve.getDiscountFactor(date(2022, 9, 5)), 4))
 
-    def testTwoTenors(self):
-        self.__testedCurve = IndexDiscountCurve(
-            valuationDate=date(2022, 9, 1),
-            tenors=['1D', '1W'],
-            tickers=["GAZP_1D", "GAZP_1W"],
-            market=QuoteProviderDisc({'GAZP_1D': 5.0, 'GAZP_1W': 10}),
+    def testTwoInterpolation(self):
+        self.assertEqual(0.9992, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 9, 5)), 4)
         )
-        self.assertEqual(0.9992, round(self.__testedCurve.getDiscountFactor(date(2022, 9, 5)), 4))
-    
+
     def testExtrapolation(self):
-        self.__testedCurve = IndexDiscountCurve(
-            valuationDate=date(2022, 9, 1),
-            tenors=['1D', '1W'],
-            tickers=["GAZP_1D", "GAZP_1W"],
-            market=QuoteProviderDisc({'GAZP_1D': 5.0, 'GAZP_1W': 10}),
+        self.assertEqual(0.9702, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 10, 5)), 4)
         )
-        self.assertEqual(0.9702, round(self.__testedCurve.getDiscountFactor(date(2022, 10, 5)), 4))
