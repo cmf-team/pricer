@@ -32,7 +32,7 @@ class Autocall(CashFlow):
         self.__maturityDate = maturityDate
         self.__observationsFrequency = observationsFrequency
         self.__underlyings = underlyings
-        self.__CouponLevel = annulizedCouponLevel / 12 *\
+        self.__CouponLevel = annulizedCouponLevel / 12 * \
                              observationsFrequency.value
         self.__autocallBarrier = autocallBarrier
         self.__couponBarrier = couponBarrier
@@ -50,6 +50,19 @@ class Autocall(CashFlow):
             self.__memoryFeature = "PhoenixMemory"
         else:
             self.__memoryFeature = None
+
+        if self.__autocallBarrier < self.__couponBarrier:
+            raise ValueError(
+                'Autocall barrier must be greater than or equal '
+                'to a coupon barrier.'
+            )
+
+        if len(self.__allDates) <= 1:
+            raise ValueError(
+                'There are no payment dates according to the '
+                'entered data. Check startDate, maturityDate and '
+                'observationsFrequency.'
+            )
 
     def getPaymentDates(self) -> list[date]:
         return self.__allDates[1:]

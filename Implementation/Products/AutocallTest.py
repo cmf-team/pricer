@@ -72,6 +72,31 @@ class AutocallTest(TestCase):
             memoryFeature=False
         )
 
+    def testExceptions(self):
+        with self.assertRaisesRegex(ValueError, 'barrier'):
+            Autocall(
+                underlyings=['GAZP', 'YNDX'],
+                couponBarrier=1.1,
+                autocallBarrier=1,
+                startDate=date(2022, 9, 1),
+                maturityDate=date(2022, 12, 1),
+                observationsFrequency=ObservationsFrequency.QUARTERLY,
+                annulizedCouponLevel=0.1,
+                memoryFeature=False
+            )
+
+        with self.assertRaisesRegex(ValueError, 'dates'):
+            Autocall(
+                underlyings=['GAZP', 'YNDX'],
+                couponBarrier=1,
+                autocallBarrier=1.1,
+                startDate=date(2022, 9, 1),
+                maturityDate=date(2022, 3, 1),
+                observationsFrequency=ObservationsFrequency.QUARTERLY,
+                annulizedCouponLevel=0.1,
+                memoryFeature=False
+            )
+
     def testPaymentDatesMonthly(self):
         self.assertEqual(
             [date(2022, 10, 1), date(2022, 11, 1), date(2022, 12, 1)],
