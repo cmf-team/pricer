@@ -128,3 +128,23 @@ class AutocallTest(TestCase):
                 sampleMarket
             ),
         )
+
+    def testNonZeroCouponNoMemory2(self):
+        sampleMarket = QuoteProviderStub()
+        self.assertEqual(
+            (1 + 0.1/12),
+            self.__testedNoMemoryMonthly.getPaymentAmount(
+                date(2022, 12, 1),
+                sampleMarket
+            ),
+        )
+
+    def testNonZeroCouponNoMemoryQuartley(self):
+        sampleMarket = QuoteProviderStub()
+        self.assertEqual(
+            1.025,
+            self.__testedNoMemoryQuarterly.getPaymentAmount(
+                date(2022, 12, 1),
+                sampleMarket
+            ),
+        )
