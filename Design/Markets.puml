@@ -34,7 +34,24 @@ package StructuredProductPricer
 !endsub
 
 
+!startsub CompositeQuoteProvider
+package StructuredProductPricer
+{
+    package Markets
+    {
+        class CompositeQuoteProvider
+        {
+            {static} +create(components: QuoteProvider[1..*])
+            +getQuotes(ticker: String, observationDates: Date[1..*]{ordered}): Real[1..*]{ordered}
+        }
+    }
+}
+!endsub
+
 FinamQuoteProvider -up--|> QuoteProvider
 MoexGCurveQuoteProvider -up--|> QuoteProvider
+CompositeQuoteProvider *-up-> "component 1..*" QuoteProvider
+CompositeQuoteProvider -up--|> QuoteProvider
+
 
 @enduml
