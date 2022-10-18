@@ -1,13 +1,10 @@
-import pandas
 from Products.QuoteProvider import QuoteProvider
 from typing import List
 import requests
 import apimoex
-import pandas as pd
-import numpy as np
+import pandas
+import numpy
 from datetime import date
-
-
 
 
 class MoexQuoteProvider(QuoteProvider):
@@ -26,10 +23,10 @@ class MoexQuoteProvider(QuoteProvider):
         endDate: date = max(observationDates)
         columns: tuple = ('TRADEDATE', 'CLOSE')
         pricesList: List[float]
-        datesDf = pd.DataFrame(observationDates)
+        datesDf = pandas.DataFrame(observationDates)
         datesDf.columns = ['TRADEDATE']
-        datesDf['TRADEDATE'] = pd.to_datetime(
-        datesDf['TRADEDATE']
+        datesDf['TRADEDATE'] = pandas.to_datetime(
+            datesDf['TRADEDATE']
         )
 
         with requests.Session() as session:
@@ -41,17 +38,16 @@ class MoexQuoteProvider(QuoteProvider):
                 columns,
                 self.__boardId
             )
-            moexDf = pd.DataFrame(quotesData)
-            moexDf['TRADEDATE'] = pd.to_datetime(moexDf['TRADEDATE'])
+            moexDf = pandas.DataFrame(quotesData)
+            moexDf['TRADEDATE'] = pandas.to_datetime(moexDf['TRADEDATE'])
             mergedResult = datesDf.merge(
                 right=moexDf,
                 how='left',
                 on='TRADEDATE',
             )
-            mergedResult['CLOSE'].replace({np.NAN: None}, inplace=True)
+            mergedResult['CLOSE'].replace({numpy.NAN: None}, inplace=True)
             pricesList = mergedResult['CLOSE'].tolist()
         return pricesList
-
 
     def getChartQuotes(
         self,
@@ -59,7 +55,8 @@ class MoexQuoteProvider(QuoteProvider):
         startDate: date,
         endDate: date
     ) -> pandas.DataFrame:
-        columns: tuple = ('TRADEDATE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME')
+        columns: tuple = (
+            'TRADEDATE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME')
         with requests.Session() as session:
             chartData = apimoex.get_board_history(
                 session,
@@ -69,5 +66,5 @@ class MoexQuoteProvider(QuoteProvider):
                 columns,
                 self.__boardId
             )
-            chartDf = pd.DataFrame(chartData)
+            chartDf = pandas.DataFrame(chartData)
         return chartDf
