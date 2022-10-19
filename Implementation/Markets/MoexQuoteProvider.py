@@ -8,10 +8,7 @@ from datetime import date
 
 
 class MoexQuoteProvider(QuoteProvider):
-    def __init__(
-        self,
-        boardId: str
-    ):
+    def __init__(self, boardId: str):
         self.__boardId = boardId
 
     def getQuotes(
@@ -19,10 +16,9 @@ class MoexQuoteProvider(QuoteProvider):
         ticker: str,
         observationDates: List[date]
     ) -> List[float]:
-        startDate: date = min(observationDates)
-        endDate: date = max(observationDates)
-        columns: tuple = ('TRADEDATE', 'CLOSE')
-        pricesList: List[float]
+        startDate = min(observationDates)
+        endDate = max(observationDates)
+        columns = ('TRADEDATE', 'CLOSE')
         datesDf = pandas.DataFrame(observationDates)
         datesDf.columns = ['TRADEDATE']
         datesDf['TRADEDATE'] = pandas.to_datetime(
@@ -46,25 +42,4 @@ class MoexQuoteProvider(QuoteProvider):
                 on='TRADEDATE',
             )
             mergedResult['CLOSE'].replace({numpy.NAN: None}, inplace=True)
-            pricesList = mergedResult['CLOSE'].tolist()
-        return pricesList
-
-    def getChartQuotes(
-        self,
-        ticker: str,
-        startDate: date,
-        endDate: date
-    ) -> pandas.DataFrame:
-        columns: tuple = (
-            'TRADEDATE', 'OPEN', 'HIGH', 'LOW', 'CLOSE', 'VOLUME')
-        with requests.Session() as session:
-            chartData = apimoex.get_board_history(
-                session,
-                ticker,
-                startDate,
-                endDate,
-                columns,
-                self.__boardId
-            )
-            chartDf = pandas.DataFrame(chartData)
-        return chartDf
+        return mergedResult['CLOSE'].tolist()

@@ -1,4 +1,4 @@
-requests
-apimoex
-Plotly
-pandas
+requests == 2.28.1
+apimoex == 1.2.0
+plotly == 5.10.0
+pandas == 1.5.0
