@@ -1,5 +1,6 @@
 from datetime import date
 from enum import Enum
+from typing import List
 
 import numpy
 from dateutil.rrule import MONTHLY, rrule
@@ -19,7 +20,7 @@ class ObservationsFrequency(Enum):
 class Autocall(CashFlow):
     def __init__(
         self,
-        underlyings: list[str],
+        underlyings: List[str],
         couponBarrier: float,
         autocallBarrier: float,
         startDate: date,
@@ -32,7 +33,7 @@ class Autocall(CashFlow):
         self.__maturityDate = maturityDate
         self.__observationsFrequency = observationsFrequency
         self.__underlyings = underlyings
-        self.__CouponLevel = annulizedCouponLevel / 12 * \
+        self.__couponLevel = annulizedCouponLevel / 12 * \
                              observationsFrequency.value
         self.__autocallBarrier = autocallBarrier
         self.__couponBarrier = couponBarrier
@@ -86,40 +87,40 @@ class Autocall(CashFlow):
             ]
         )
         normalizedQuotes = quotes / quotes[:, 0][:, None]
-        worstOfNormilizedQuotes = normalizedQuotes[:, 1:].min(axis=0)
+        worstOfNormalizedQuotes = normalizedQuotes[:, 1:].min(axis=0)
 
-        if len(worstOfNormilizedQuotes) == 1:
+        if len(worstOfNormalizedQuotes) == 1:
             alreadyAutocalled = 0
         else:
             alreadyAutocalled = (
-                    worstOfNormilizedQuotes[:-1].max() >
+                    worstOfNormalizedQuotes[:-1].max() >
                     self.__autocallBarrier
             )
         if alreadyAutocalled:
             return 0
 
         couponCondition = int(
-            worstOfNormilizedQuotes[-1] >=
+            worstOfNormalizedQuotes[-1] >=
             self.__couponBarrier
         )
 
         if couponCondition and self.__memoryFeature == "AutocallIncremental":
             return 1 + len(
-                worstOfNormilizedQuotes
-            ) * self.__CouponLevel
+                worstOfNormalizedQuotes
+            ) * self.__couponLevel
         elif couponCondition and self.__memoryFeature == "PhoenixMemory":
             unpaidCouponsNumber = 0
-            i = len(worstOfNormilizedQuotes[:-1]) - 1
+            i = len(worstOfNormalizedQuotes[:-1]) - 1
             while (
                     i >= 0 and
-                    worstOfNormilizedQuotes[:-1][i] < self.__couponBarrier
+                    worstOfNormalizedQuotes[:-1][i] < self.__couponBarrier
             ):
                 unpaidCouponsNumber += 1
                 i -= 1
 
-            coupon = unpaidCouponsNumber * self.__CouponLevel
+            coupon = unpaidCouponsNumber * self.__couponLevel
         elif couponCondition and not self.__memoryFeature:
-            coupon = self.__CouponLevel
+            coupon = self.__couponLevel
         else:
             coupon = 0
 
@@ -127,7 +128,7 @@ class Autocall(CashFlow):
             autocallCondition = 1
         else:
             autocallCondition = int(
-                worstOfNormilizedQuotes[-1] >=
+                worstOfNormalizedQuotes[-1] >=
                 self.__autocallBarrier
             )
 

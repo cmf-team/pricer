@@ -139,7 +139,7 @@ class AutocallTest(TestCase):
             ),
         )
 
-    def testNonZeroCouponNoMemoryQuartley(self):
+    def testNonZeroCouponNoMemoryQuarterly(self):
         sampleMarket = QuoteProviderStub()
         self.assertEqual(
             1.025,
