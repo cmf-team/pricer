@@ -1,8 +1,9 @@
 from datetime import date
 from unittest import TestCase
 
-from Products.Autocall import Autocall, ObservationsFrequency
 from Products.QuoteProvider import QuoteProvider
+from Products.StructuredProductFactory import ObservationsFrequency, \
+    StructuredProductFactory
 
 GAZPQuotes = {
     date(2022, 9, 1): 100,
@@ -50,51 +51,44 @@ class QuoteProviderStub(QuoteProvider):
 
 class AutocallTest(TestCase):
     def setUp(self) -> None:
-        self.__testedNoMemoryMonthly = Autocall(
-            underlyings=['GAZP', 'YNDX'],
-            couponBarrier=1,
-            autocallBarrier=1.1,
-            startDate=date(2022, 9, 1),
-            maturityDate=date(2022, 12, 1),
-            observationsFrequency=ObservationsFrequency.MONTHLY,
-            annulizedCouponLevel=0.1,
-            memoryFeature=False
-        )
-
-        self.__testedNoMemoryQuarterly = Autocall(
-            underlyings=['GAZP', 'YNDX'],
-            couponBarrier=1,
-            autocallBarrier=1.1,
-            startDate=date(2022, 9, 1),
-            maturityDate=date(2022, 12, 1),
-            observationsFrequency=ObservationsFrequency.QUARTERLY,
-            annulizedCouponLevel=0.1,
-            memoryFeature=False
-        )
+        self.__NoMemoryMonthly = {
+            'underlyings': ['GAZP', 'YNDX'],
+            'couponBarrier': 1,
+            'autocallBarrier': 1.1,
+            'startDate': date(2022, 9, 1),
+            'maturityDate': date(2022, 12, 1),
+            'observationsFrequency': ObservationsFrequency.MONTHLY,
+            'annulizedCouponLevel': 0.1,
+            'memoryFeature': False
+        }
+        self.__NoMemoryQuarterly = {
+            'underlyings': ['GAZP', 'YNDX'],
+            'couponBarrier': 1,
+            'autocallBarrier': 1.1,
+            'startDate': date(2022, 9, 1),
+            'maturityDate': date(2022, 12, 1),
+            'observationsFrequency': ObservationsFrequency.QUARTERLY,
+            'annulizedCouponLevel': 0.1,
+            'memoryFeature': False
+        }
+        self.__testedNoMemoryMonthly = \
+            StructuredProductFactory.createAutocall(**self.__NoMemoryMonthly)
+        self.__testedNoMemoryQuarterly = \
+            StructuredProductFactory.createAutocall(**self.__NoMemoryQuarterly)
 
     def testExceptions(self):
         with self.assertRaisesRegex(ValueError, 'barrier'):
-            Autocall(
-                underlyings=['GAZP', 'YNDX'],
-                couponBarrier=1.1,
-                autocallBarrier=1,
-                startDate=date(2022, 9, 1),
-                maturityDate=date(2022, 12, 1),
-                observationsFrequency=ObservationsFrequency.QUARTERLY,
-                annulizedCouponLevel=0.1,
-                memoryFeature=False
+            barrierCheck = self.__NoMemoryMonthly.copy()
+            barrierCheck['couponBarrier'] = 1.2
+            StructuredProductFactory.createAutocall(
+                **barrierCheck
             )
 
         with self.assertRaisesRegex(ValueError, 'dates'):
-            Autocall(
-                underlyings=['GAZP', 'YNDX'],
-                couponBarrier=1,
-                autocallBarrier=1.1,
-                startDate=date(2022, 9, 1),
-                maturityDate=date(2022, 3, 1),
-                observationsFrequency=ObservationsFrequency.QUARTERLY,
-                annulizedCouponLevel=0.1,
-                memoryFeature=False
+            datesCheck = self.__NoMemoryMonthly.copy()
+            datesCheck['startDate'] = date(2023, 9, 1)
+            StructuredProductFactory.createAutocall(
+                **datesCheck
             )
 
     def testPaymentDatesMonthly(self):
@@ -132,7 +126,7 @@ class AutocallTest(TestCase):
     def testNonZeroCouponNoMemory2(self):
         sampleMarket = QuoteProviderStub()
         self.assertEqual(
-            (1 + 0.1/12),
+            (1 + 0.1 / 12),
             self.__testedNoMemoryMonthly.getPaymentAmount(
                 date(2022, 12, 1),
                 sampleMarket
