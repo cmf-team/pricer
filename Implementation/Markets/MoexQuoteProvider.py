@@ -1,11 +1,12 @@
-from Products.QuoteProvider import QuoteProvider
-from typing import List
-import requests
 import apimoex
-import pandas
 import numpy
-from datetime import date
+import pandas
+import requests
 
+from datetime import date
+from typing import List
+
+from Products.QuoteProvider import QuoteProvider
 
 class MoexQuoteProvider(QuoteProvider):
     def __init__(self, boardId: str):
@@ -18,28 +19,29 @@ class MoexQuoteProvider(QuoteProvider):
     ) -> List[float]:
         startDate = min(observationDates)
         endDate = max(observationDates)
-        columns = ('TRADEDATE', 'CLOSE')
-        datesDf = pandas.DataFrame(observationDates)
-        datesDf.columns = ['TRADEDATE']
-        datesDf['TRADEDATE'] = pandas.to_datetime(
-            datesDf['TRADEDATE']
+        resultDates = pandas.DataFrame(observationDates)
+        resultDates.columns = ['TRADEDATE']
+        resultDates['TRADEDATE'] = pandas.to_datetime(
+            resultDates['TRADEDATE']
         )
 
         with requests.Session() as session:
-            quotesData = apimoex.get_board_history(
-                session,
-                ticker,
-                startDate,
-                endDate,
-                columns,
-                self.__boardId
+            quoteData = pandas.DataFrame(
+                apimoex.get_board_history(
+                    session,
+                    ticker,
+                    startDate.strftime("%Y-%m-%d"),
+                    endDate.strftime("%Y-%m-%d"),
+                    ('TRADEDATE', 'CLOSE'),
+                    self.__boardId
+                )
             )
-            moexDf = pandas.DataFrame(quotesData)
-            moexDf['TRADEDATE'] = pandas.to_datetime(moexDf['TRADEDATE'])
-            mergedResult = datesDf.merge(
-                right=moexDf,
+            quoteData = pandas.DataFrame(quoteData)
+            quoteData['TRADEDATE'] = pandas.to_datetime(quoteData['TRADEDATE'])
+            result = resultDates.merge(
+                right=quoteData,
                 how='left',
                 on='TRADEDATE',
             )
-            mergedResult['CLOSE'].replace({numpy.NAN: None}, inplace=True)
-        return mergedResult['CLOSE'].tolist()
+            result['CLOSE'].replace({numpy.NAN: None}, inplace=True)
+        return result['CLOSE'].tolist()

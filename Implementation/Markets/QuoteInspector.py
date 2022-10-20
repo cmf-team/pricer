@@ -1,17 +1,15 @@
-import plotly.graph_objects
-from Markets.MoexQuoteProvider import MoexQuoteProvider
-from datetime import date
-from typing import List
 import pandas
 
+from datetime import date
+from plotly import graph_objects
+from typing import List
+
+from Markets.MoexQuoteProvider import MoexQuoteProvider
+from Products.QuoteProvider import QuoteProvider
 
 class QuoteInspector:
-    def __init__(
-        self,
-        boardId: str
-    ):
-        self.__boardId = boardId
-
+    def __init__(self, inspectedObject: QuoteProvider):
+        self.__inspectedObject = inspectedObject
     def plotQuotes(
         self,
         tickers: List[str],
@@ -22,9 +20,8 @@ class QuoteInspector:
             start=startDate,
             end=endDate
         ).tolist()
-        inspectedObject = MoexQuoteProvider(self.__boardId)
         for ticker in tickers:
-            observationPrices = inspectedObject.getQuotes(
+            observationPrices = self.__inspectedObject.getQuotes(
                 ticker,
                 observationDates
             )
@@ -33,8 +30,8 @@ class QuoteInspector:
                 columns=['TRADEDATE', 'CLOSE']
             )
             chartDf.dropna(subset=['CLOSE'], inplace=True)
-            chart = plotly.graph_objects.Figure(
-                data=plotly.graph_objects.Scatter(
+            chart = graph_objects.Figure(
+                data=graph_objects.Scatter(
                     x=chartDf['TRADEDATE'],
                     y=chartDf['CLOSE'],
                     mode='lines',
@@ -47,7 +44,8 @@ class QuoteInspector:
 # simple example for plotQuotes method
 if __name__ == '__main__':
     tickerList = ['GAZP', 'SBER', 'OZON']
-    sampleChartObject = QuoteInspector('TQBR')
+    sampleQuoteObject= MoexQuoteProvider('TQBR')
+    sampleChartObject = QuoteInspector(sampleQuoteObject)
     sampleChartObject.plotQuotes(
         tickerList,
         date(2022, 1, 1),

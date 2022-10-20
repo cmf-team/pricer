@@ -1,5 +1,7 @@
-from Markets.MoexQuoteProvider import MoexQuoteProvider
 from datetime import date
+
+from Markets.MoexQuoteProvider import MoexQuoteProvider
+
 
 # simple test for getQuotes method
 sampleQuoteObject = MoexQuoteProvider('TQBR')
