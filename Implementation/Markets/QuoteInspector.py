@@ -7,9 +7,11 @@ from typing import List
 from Markets.MoexQuoteProvider import MoexQuoteProvider
 from Products.QuoteProvider import QuoteProvider
 
+
 class QuoteInspector:
     def __init__(self, inspectedObject: QuoteProvider):
         self.__inspectedObject = inspectedObject
+
     def plotQuotes(
         self,
         tickers: List[str],
@@ -44,7 +46,7 @@ class QuoteInspector:
 # simple example for plotQuotes method
 if __name__ == '__main__':
     tickerList = ['GAZP', 'SBER', 'OZON']
-    sampleQuoteObject= MoexQuoteProvider('TQBR')
+    sampleQuoteObject = MoexQuoteProvider('TQBR')
     sampleChartObject = QuoteInspector(sampleQuoteObject)
     sampleChartObject.plotQuotes(
         tickerList,

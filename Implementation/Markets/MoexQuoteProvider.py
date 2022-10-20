@@ -8,6 +8,7 @@ from typing import List
 
 from Products.QuoteProvider import QuoteProvider
 
+
 class MoexQuoteProvider(QuoteProvider):
     def __init__(self, boardId: str):
         self.__boardId = boardId

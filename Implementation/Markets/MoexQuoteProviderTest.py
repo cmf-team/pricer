@@ -2,7 +2,6 @@ from datetime import date
 
 from Markets.MoexQuoteProvider import MoexQuoteProvider
 
-
 # simple test for getQuotes method
 sampleQuoteObject = MoexQuoteProvider('TQBR')
 sampleDates = [date(2022, 1, 9), date(2022, 2, 10), date(2022, 10, 3),
