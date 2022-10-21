@@ -2,8 +2,8 @@ import math
 from datetime import date
 from typing import List
 
-from DiscountCurve import DiscountCurve
-from QuoteProvider import QuoteProvider
+from Products.DiscountCurve import DiscountCurve
+from Products.QuoteProvider import QuoteProvider
 
 
 class IndexDiscountCurve(DiscountCurve):
