@@ -49,7 +49,7 @@ class Autocall(CashFlow):
         returns = quotes[:, 1] / quotes[:, 0]
         return returns.min()
 
-    def __isRecalled(
+    def __isRecallDate(
         self,
         couponDate: date,
         market: QuoteProvider,
@@ -68,6 +68,9 @@ class Autocall(CashFlow):
         paymentDate: date,
         market: QuoteProvider,
     ) -> float:
+        if not self.__memoryFeature:
+            return 0
+
         memorizedCoupons = 0
         paymentDateIndex = self.__couponDates.index(paymentDate)
         for couponDateIndex in range(paymentDateIndex - 1, -1, -1):
@@ -89,23 +92,20 @@ class Autocall(CashFlow):
         else:
             return 0
 
-        paymentAmount = 0
-
         for couponDateIndex in range(paymentDateIndex):
-            if self.__isRecalled(self.__couponDates[couponDateIndex], market):
+            if self.__isRecallDate(
+                    self.__couponDates[couponDateIndex],
+                    market
+            ):
                 return 0
 
-        if self.__isRecalled(self.__couponDates[paymentDateIndex], market):
+        paymentAmount = 0
+        if self.__isRecallDate(self.__couponDates[paymentDateIndex], market):
             paymentAmount += 1
 
         if self.__getWorstReturn(paymentDate, market) >= self.__couponBarrier:
             paymentAmount += self.__couponAmounts[paymentDateIndex]
-
-            if self.__memoryFeature:
-                paymentAmount += self.__getMemorizedCoupons(
-                    paymentDate,
-                    market
-                )
+            paymentAmount += self.__getMemorizedCoupons(paymentDate, market)
 
         return paymentAmount
 

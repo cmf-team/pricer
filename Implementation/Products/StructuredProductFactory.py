@@ -33,7 +33,7 @@ class StructuredProductFactory:
             )
 
         couponDates = [
-            dt.date() for dt in rrule(
+            couponDate.date() for couponDate in rrule(
                 MONTHLY,
                 interval=observationsFrequency.value,
                 dtstart=startDate,
