@@ -29,7 +29,7 @@ class Autocall(CashFlow):
         self.__couponAmounts = couponAmounts
         self.__memoryFeature = memoryFeature
 
-    def getPaymentDates(self) -> list[date]:
+    def getPaymentDates(self) -> List[date]:
         return self.__couponDates
 
     def getWorstReturns(
@@ -60,10 +60,10 @@ class Autocall(CashFlow):
         worstReturns = returns.min(axis=0)
         return worstReturns
 
-    def isRecall(
+    def __isRecalled(
         self,
         worstReturns: numpy.ndarray,
-        paymentDate: date,
+        couponDate: date,
     ) -> str:
         if (
                 len(worstReturns) > 1 and
@@ -72,7 +72,7 @@ class Autocall(CashFlow):
             return 'Already Recalled'
 
         if (
-                paymentDate == self.__couponDates[-1] or
+                couponDate == self.__couponDates[-1] or
                 worstReturns[-1] > self.__autocallBarrier
         ):
             return 'Recall'
@@ -81,42 +81,49 @@ class Autocall(CashFlow):
 
     def getUnpaidCoupons(
         self,
-        worstReturns: List[float]
+        worstReturns: List[float],
+        couponCondition: bool,
     ) -> float:
-        unpaidCouponsNumber = 0
-        for worstReturn in numpy.flip(worstReturns[:-1]):
-            if worstReturn < self.__couponBarrier:
-                unpaidCouponsNumber += 1
+        if not couponCondition or not self.__memoryFeature:
+            return 0
+
+        unpaidCouponsAmount = 0
+        for i in range(len(worstReturns) - 2, -1, -1):
+            if worstReturns[i] < self.__couponBarrier:
+                unpaidCouponsAmount += self.__couponAmounts[i]
             else:
                 break
-        return sum(self.__couponAmounts[-unpaidCouponsNumber - 1:-1])
+
+        return unpaidCouponsAmount
 
     def getPaymentAmount(
         self,
         paymentDate: date,
         market: QuoteProvider
     ) -> float:
-        try:
+        if paymentDate in self.__couponDates:
             paymentDateIndex = self.__couponDates.index(paymentDate)
-        except ValueError:
+        else:
             return 0
 
         paymentAmount = 0
         worstReturns = self.getWorstReturns(paymentDate, market)
 
-        isRecall = self.isRecall(worstReturns, paymentDate)
+        isRecall = self.__isRecalled(worstReturns, paymentDate)
         if isRecall == 'Already Recalled':
             return 0
         elif isRecall == 'Recall':
             paymentAmount += 1
 
-        couponCondition = int(worstReturns[-1] >= self.__couponBarrier)
+        if worstReturns[-1] >= self.__couponBarrier:
+            couponCondition = True
+        else:
+            couponCondition = False
+
         paymentAmount += (
                 couponCondition * self.__couponAmounts[paymentDateIndex]
         )
-
-        if couponCondition and self.__memoryFeature:
-            paymentAmount += self.getUnpaidCoupons(worstReturns)
+        paymentAmount += self.getUnpaidCoupons(worstReturns, couponCondition)
 
         return paymentAmount
 

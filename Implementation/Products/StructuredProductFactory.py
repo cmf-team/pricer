@@ -7,7 +7,7 @@ from dateutil.rrule import MONTHLY, rrule
 from Products.Autocall import Autocall
 
 
-class ObservationsFrequency(Enum):
+class PaymentFrequency(Enum):
     MONTHLY = 1
     QUARTERLY = 3
     SEMIANNUAL = 6
@@ -22,8 +22,8 @@ class StructuredProductFactory:
         autocallBarrier: float,
         startDate: date,
         maturityDate: date,
-        observationsFrequency: ObservationsFrequency,
-        annulizedCouponLevel: float,
+        observationsFrequency: PaymentFrequency,
+        couponRate: float,
         memoryFeature: bool
     ):
         if autocallBarrier < couponBarrier:
@@ -39,18 +39,19 @@ class StructuredProductFactory:
                 dtstart=startDate,
                 until=maturityDate
             )
-        ][1:]
+        ]
 
-        if len(couponDates) == 0:
+        if len(couponDates) <= 1:
             raise ValueError(
                 'There are no payment dates according to the '
                 'entered data. Check startDate, maturityDate and '
                 'observationsFrequency.'
             )
 
-        couponAmount = (annulizedCouponLevel / 12 *
-                        observationsFrequency.value)
-        couponAmounts = [couponAmount for _ in range(len(couponDates))]
+        couponAmounts = [
+            couponRate * (couponDates[i + 1] - couponDates[i]).days / 365
+            for i in range(len(couponDates) - 1)
+        ]
 
         return Autocall(
             underlyings=underlyings,
@@ -58,7 +59,7 @@ class StructuredProductFactory:
             autocallBarrier=autocallBarrier,
             startDate=startDate,
             maturityDate=maturityDate,
-            couponDates=couponDates,
+            couponDates=couponDates[1:],
             couponAmounts=couponAmounts,
             memoryFeature=memoryFeature
         )
