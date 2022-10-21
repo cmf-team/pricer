@@ -2,8 +2,8 @@ import math
 from datetime import date
 from typing import List
 
-from Products.DiscountCurve import DiscountCurve
-from Products.QuoteProvider import QuoteProvider
+from DiscountCurve import DiscountCurve
+from QuoteProvider import QuoteProvider
 
 
 class IndexDiscountCurve(DiscountCurve):
@@ -24,11 +24,17 @@ class IndexDiscountCurve(DiscountCurve):
     def getDiscountFactor(self, paymentDate: date) -> float:
         timeToPayment = (paymentDate - self.__valuationDate).days / 365
         rate = 0
-        for i in range(len(self.__durations)):
-            if timeToPayment > self.__durations[i] or len(self.__durations) == 1:
-                rate = self.__interpolate(timeToPayment, i)
-                break
 
+        if len(self.__durations) == 1:
+            rate = self.__interpolate(timeToPayment, 0)
+        elif timeToPayment > self.__durations[-1]:
+            rate = self.__interpolate(timeToPayment, len(self.__durations) - 1)
+        else:
+            for i in range(1, len(self.__durations)):
+                if timeToPayment < self.__durations[i]:
+                    rate = self.__interpolate(timeToPayment, i - 1)
+                    break
+        
         discontFactor = math.exp(-rate*timeToPayment)
         return discontFactor
 

@@ -1,8 +1,8 @@
 from unittest import TestCase
 from datetime import date
 from typing import List
-from Products.IndexDiscountCurve import IndexDiscountCurve
-from Products.QuoteProvider import QuoteProvider
+from IndexDiscountCurve import IndexDiscountCurve
+from QuoteProvider import QuoteProvider
 
 
 class QuoteProviderDisc(QuoteProvider):
@@ -27,22 +27,52 @@ class VanillaStructuredProductTest(TestCase):
     def setUp(self):
         self.__testedCurve = IndexDiscountCurve(
             valuationDate=date(2022, 9, 1),
-            tenors=['1D', '1W'],
-            tickers=["RATE1D", "RATE1W"],
-            market=QuoteProviderDisc({'RATE1D': 5.0, 'RATE1W': 10}),
+            tenors=['1D', '1W', '1M', '1Y'],
+            tickers=["RATE1D", "RATE1W", "RATE1M", "RATE1Y"],
+            market=QuoteProviderDisc({'RATE1D': 0.5, 'RATE1W': 1.3, 'RATE1M': 3.6, 'RATE1Y': 12.9}),
         )
 
-    def testOneTenor(self):
-        self.assertEqual(0.9992, round(
+    def testDayInterpolation(self):
+        self.assertEqual(0.9999, round(
             self.__testedCurve.getDiscountFactor(date(2022, 9, 5)), 4)
         )
 
-    def testTwoInterpolation(self):
-        self.assertEqual(0.9992, round(
-            self.__testedCurve.getDiscountFactor(date(2022, 9, 5)), 4)
+    def testDayPointValue(self):
+        self.assertEqual(1, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 9, 1)), 4)
         )
 
+    def testWeekInterpolation(self):
+        self.assertEqual(0.9996, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 9, 10)), 4)
+        )
+
+    def testWeekPointValue(self):
+        self.assertEqual(0.9998, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 9, 8)), 4)
+        )
+
+    def testMonthInterpolation(self):
+        self.assertEqual(0.9959, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 10, 10)), 4)
+        )
+
+    def testMonthPointValue(self):
+        self.assertEqual(0.997, round(
+            self.__testedCurve.getDiscountFactor(date(2022, 10, 1)), 4)
+        )
+
+    def testYearInterpolation(self):
+        self.assertEqual(0.9773, round(
+                self.__testedCurve.getDiscountFactor(date(2023, 1, 10)), 4)
+        )
+
+    def testYearPointValue(self):
+        self.assertEqual(0.8619, round(
+            self.__testedCurve.getDiscountFactor(date(2023, 10, 1)), 4)
+        )
+    
     def testExtrapolation(self):
-        self.assertEqual(0.9702, round(
-            self.__testedCurve.getDiscountFactor(date(2022, 10, 5)), 4)
+        self.assertEqual(0.1765, round(
+            self.__testedCurve.getDiscountFactor(date(2026, 9, 1)), 4)
         )
