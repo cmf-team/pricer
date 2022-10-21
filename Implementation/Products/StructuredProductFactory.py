@@ -22,7 +22,7 @@ class StructuredProductFactory:
         autocallBarrier: float,
         startDate: date,
         maturityDate: date,
-        observationsFrequency: PaymentFrequency,
+        paymentFrequency: PaymentFrequency,
         couponRate: float,
         memoryFeature: bool
     ):
@@ -35,7 +35,7 @@ class StructuredProductFactory:
         couponDates = [
             couponDate.date() for couponDate in rrule(
                 MONTHLY,
-                interval=observationsFrequency.value,
+                interval=paymentFrequency.value,
                 dtstart=startDate,
                 until=maturityDate
             )
