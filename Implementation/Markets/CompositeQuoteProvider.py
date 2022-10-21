@@ -1,4 +1,3 @@
-from msilib.schema import Error
 from Products.QuoteProvider import QuoteProvider
 from typing import List, Iterable
 from datetime import date
