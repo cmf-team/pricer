@@ -32,69 +32,52 @@ class Autocall(CashFlow):
     def getPaymentDates(self) -> List[date]:
         return self.__couponDates
 
-    def getWorstReturns(
+    def __getWorstReturn(
         self,
         paymentDate: date,
         market: QuoteProvider
-    ) -> numpy.ndarray:
-        initialQuotes = numpy.array(
-            [
-                market.getQuotes(
-                    underlying,
-                    [self.__startDate]
-                )
-                for underlying in self.__underlyings
-            ]
-        )
-        paymentDateIndex = self.__couponDates.index(paymentDate)
+    ) -> float:
         quotes = numpy.array(
             [
                 market.getQuotes(
                     underlying,
-                    self.__couponDates[:paymentDateIndex + 1]
+                    [self.__startDate, paymentDate]
                 )
                 for underlying in self.__underlyings
             ]
         )
-        returns = quotes / initialQuotes
-        worstReturns = returns.min(axis=0)
-        return worstReturns
+        returns = quotes[:, 1] / quotes[:, 0]
+        return returns.min()
 
     def __isRecalled(
         self,
-        worstReturns: numpy.ndarray,
         couponDate: date,
-    ) -> str:
+        market: QuoteProvider,
+    ) -> bool:
+        worstReturn = self.__getWorstReturn(couponDate, market)
         if (
-                len(worstReturns) > 1 and
-                worstReturns[:-1].max() > self.__autocallBarrier
+                worstReturn > self.__autocallBarrier or
+                couponDate == self.__couponDates[-1]
         ):
-            return 'Already Recalled'
+            return True
+        else:
+            return False
 
-        if (
-                couponDate == self.__couponDates[-1] or
-                worstReturns[-1] > self.__autocallBarrier
-        ):
-            return 'Recall'
-
-        return 'No'
-
-    def getUnpaidCoupons(
+    def __getMemorizedCoupons(
         self,
-        worstReturns: List[float],
-        couponCondition: bool,
+        paymentDate: date,
+        market: QuoteProvider,
     ) -> float:
-        if not couponCondition or not self.__memoryFeature:
-            return 0
-
-        unpaidCouponsAmount = 0
-        for i in range(len(worstReturns) - 2, -1, -1):
-            if worstReturns[i] < self.__couponBarrier:
-                unpaidCouponsAmount += self.__couponAmounts[i]
+        memorizedCoupons = 0
+        paymentDateIndex = self.__couponDates.index(paymentDate)
+        for couponDateIndex in range(paymentDateIndex - 1, -1, -1):
+            couponDate = self.__couponDates[couponDateIndex]
+            worstReturn = self.__getWorstReturn(couponDate, market)
+            if worstReturn < self.__couponBarrier:
+                memorizedCoupons += self.__couponAmounts[couponDateIndex]
             else:
                 break
-
-        return unpaidCouponsAmount
+        return memorizedCoupons
 
     def getPaymentAmount(
         self,
@@ -107,23 +90,22 @@ class Autocall(CashFlow):
             return 0
 
         paymentAmount = 0
-        worstReturns = self.getWorstReturns(paymentDate, market)
 
-        isRecall = self.__isRecalled(worstReturns, paymentDate)
-        if isRecall == 'Already Recalled':
-            return 0
-        elif isRecall == 'Recall':
+        for couponDateIndex in range(paymentDateIndex):
+            if self.__isRecalled(self.__couponDates[couponDateIndex], market):
+                return 0
+
+        if self.__isRecalled(self.__couponDates[paymentDateIndex], market):
             paymentAmount += 1
 
-        if worstReturns[-1] >= self.__couponBarrier:
-            couponCondition = True
-        else:
-            couponCondition = False
+        if self.__getWorstReturn(paymentDate, market) >= self.__couponBarrier:
+            paymentAmount += self.__couponAmounts[paymentDateIndex]
 
-        paymentAmount += (
-                couponCondition * self.__couponAmounts[paymentDateIndex]
-        )
-        paymentAmount += self.getUnpaidCoupons(worstReturns, couponCondition)
+            if self.__memoryFeature:
+                paymentAmount += self.__getMemorizedCoupons(
+                    paymentDate,
+                    market
+                )
 
         return paymentAmount
 
