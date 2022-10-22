@@ -45,11 +45,11 @@ class QuoteInspector:
 
 # simple example for plotQuotes method
 if __name__ == '__main__':
-    tickerList = ['GAZP', 'SBER', 'OZON']
+    sampleTickers = ['GAZP', 'SBER', 'OZON']
     sampleQuoteObject = MoexQuoteProvider('TQBR')
     sampleChartObject = QuoteInspector(sampleQuoteObject)
     sampleChartObject.plotQuotes(
-        tickerList,
+        sampleTickers,
         date(2022, 1, 1),
         date(2022, 10, 10)
     )
