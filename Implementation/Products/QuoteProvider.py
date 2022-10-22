@@ -4,7 +4,6 @@ from typing import List
 
 
 class QuoteProvider(ABC):
-
     @abstractmethod
     def getQuotes(
         self,

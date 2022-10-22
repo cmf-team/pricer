@@ -58,7 +58,7 @@ package StructuredProductPricer
         abstract class CovarianceTermStructure
         {
             {abstract} +getObservationDate(): Date
-            {abstract} +getTotalCovariance(forecastDate: Date)
+            {abstract} +getTotalCovariance(forecastDate: Date): Matrix
         }
     }
 !endsub
@@ -89,7 +89,7 @@ package StructuredProductPricer
             -historicalWindow: Date[2..*]
             {static} +create(underlyings: String[1..*]{ordered}, observationDate: Date, historicalWindowSize: Real, market: QuoteProvider)
             +getObservationDate(): Date
-            +getTotalCovariance(forecastDate: Date)
+            +getTotalCovariance(forecastDate: Date): Matrix
         }
     }
 !endsub
@@ -120,13 +120,27 @@ package StructuredProductPricer
     {
         class SimulationPricer
         {
+            -underlyings: String[1..*]
             -valuationDate: Date
-            {static} +createPricer(underlyings: String[1..*], market: QuoteProvider): Pricer
-            {static} +create(underlyings, valuationDate: Date, market: QuoteProvider)
+            {static} +create(underlyings: String[1..*], valuationDate: Date, discountCurve: DiscountCurve[1..*], underlyingCovarianceForecast: CovarianceTermStructure)
             +getValuationDate(): Date
             +getDiscountFactor(paymentDate: Date): Real
             +getCallOptionBasePrice(underlying: String, strike: Real, maturityDate: Date): Real
             +getCashFlowBasePrice(pricedElement: CashFlow): Real
+        }
+    }
+}
+!endsub
+
+
+!startsub SimulationPricerFactory
+package StructuredProductPricer
+{
+    package Simulation
+    {
+        class SimulationPricerFactory
+        {
+            {static} +createPricer(underlyings: String[1..*], market: QuoteProvider): Pricer
         }
     }
 }
@@ -142,13 +156,16 @@ SimulatedQuoteProvider -up--|> QuoteProvider
 SimulatedQuoteProvider -up--> "originalQuoteProvider" QuoteProvider
 SimulatedQuoteProvider --> "amendment" Simulation
 SimulationPricer -up--|> Pricer
-SimulationPricer -up--|> PricerFactory
+SimulationPricerFactory -up--|> PricerFactory
+SimulationPricer -up--> "originalMarket" QuoteProvider
 SimulationPricer --> "discountCurve" DiscountCurve
 SimulationPricer --> "underlyingCovarianceForecast" CovarianceTermStructure
 SimulationPricer --> "implementation" Simulation
-SimulationPricer ..> IndexDiscountCurve: create
-SimulationPricer ..> FlatHistoricalCovarianceForecast: create
+SimulationPricerFactory ..> SimulationPricer: create
+SimulationPricerFactory ..> IndexDiscountCurve: create
+SimulationPricerFactory ..> FlatHistoricalCovarianceForecast: create
 SimulationPricer ..> SimulatedQuoteProvider: create
 
 
 @enduml
+
