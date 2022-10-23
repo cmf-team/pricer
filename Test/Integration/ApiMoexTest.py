@@ -20,8 +20,10 @@ class ApiMoexTest(TestCase):
 
     def testStockQuotesFeed(self):
         session = requests.Session()
+
         for expectedQuote in sampleQuoteData:
             with self.subTest(f"GAZP @ {expectedQuote['TRADEDATE']}"):
+                pass
                 self.assertIn(
                     expectedQuote,
                     apimoex.get_board_history(
