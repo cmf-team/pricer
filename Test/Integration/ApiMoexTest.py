@@ -3,7 +3,7 @@ from unittest import TestCase
 import apimoex
 import requests
 
-from Markets.MoexQuoteProviderTest import sampleQuoteData
+from Implementation.Markets.MoexQuoteProviderTest import sampleQuoteData
 
 
 class ApiMoexTest(TestCase):
