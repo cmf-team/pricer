@@ -8,7 +8,7 @@ from Markets.MoexQuoteProviderTest import sampleQuoteData
 
 class ApiMoexTest(TestCase):
 
-    def testSampleQuoteData(self):
+    def testStockQuotesFeed(self):
         with requests.Session() as session:
             for expectedQuote in sampleQuoteData:
                 with self.subTest(f"GAZP @ {expectedQuote['TRADEDATE']}"):
