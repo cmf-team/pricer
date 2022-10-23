@@ -1,8 +1,9 @@
-import pandas
-
-from datetime import date
-from plotly import graph_objects
+import os.path
+from datetime import date, timedelta
 from typing import List
+
+import pandas
+from plotly import graph_objects
 
 from Markets.MoexQuoteProvider import MoexQuoteProvider
 from Products.QuoteProvider import QuoteProvider
@@ -39,9 +40,44 @@ class QuoteInspector:
             chart.update_layout(title=ticker)
             chart.show()
 
+    def exportQuotes(
+        self,
+        tickers: List[str],
+        startDate: date,
+        endDate: date,
+        outputFilePath: str
+    ):
+        """
+        Exports quotes for given tickers and observation period to Excel file.
+
+        :param outputFilePath: Path to Excel file in existing directory to
+            export quotes to.
+        """
+        if not os.path.exists(os.path.dirname(outputFilePath)):
+            raise ValueError(
+                f"Directory {os.path.dirname(outputFilePath)} does not exist."
+            )
+        if not outputFilePath.endswith(".xlsx"):
+            raise ValueError(
+                f"Wrong file extension {outputFilePath.split('.')[-1]}."
+            )
+        observationDates = self.__getHistoricalWindow(startDate, endDate)
+        output = pandas.DataFrame()
+        output["Date"] = observationDates
+        for ticker in tickers:
+            output[ticker] = self.__inspectedObject.getQuotes(
+                ticker,
+                observationDates
+            )
+        output = output.set_index("Date")
+        output.to_excel(outputFilePath, index_label="Date")
+
     @staticmethod
     def __getHistoricalWindow(startDate: date, endDate: date) -> List[date]:
-        return pandas.date_range(start=startDate, end=endDate).tolist()
+        return [
+            startDate + timedelta(days=dateIndex)
+            for dateIndex in range((endDate - startDate).days + 1)
+        ]
 
 
 # simple example for plotQuotes method
