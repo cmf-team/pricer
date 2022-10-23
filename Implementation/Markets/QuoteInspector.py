@@ -24,16 +24,16 @@ class QuoteInspector:
                 ticker,
                 observationDates
             )
-            chartDf = pandas.DataFrame(
+            plottedData = pandas.DataFrame(
                 list(zip(observationDates, observationPrices)),
                 columns=['TRADEDATE', 'CLOSE']
             )
-            chartDf.dropna(subset=['CLOSE'], inplace=True)
+            plottedData.dropna(subset=['CLOSE'], inplace=True)
             chart = graph_objects.Figure(
                 data=graph_objects.Scatter(
-                    x=chartDf['TRADEDATE'],
-                    y=chartDf['CLOSE'],
-                    mode='lines',
+                    x=plottedData['TRADEDATE'],
+                    y=plottedData['CLOSE'],
+                    mode='lines+markers',
                 )
             )
             chart.update_layout(title=ticker)
