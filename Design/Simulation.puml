@@ -92,6 +92,30 @@ package StructuredProductPricer
             +getTotalCovariance(forecastDate: Date): Matrix
         }
     }
+}
+!endsub
+
+
+!startsub GarchCovarianceForecast
+package StructuredProductPricer
+{
+    package Simulation
+    {
+        class GarchCovarianceForecast
+        {
+            -observationDate: Date
+            -correlation: Matrix
+            -alpha: Real[1..*]
+            -beta: Real[1..*]
+            -longRunVariance: Real[1..*]
+            {static} +create(underlyings: String[1..*]{ordered}, observationDate: Date, historicalWindowSize: Real, market: QuoteProvider)
+            +getObservationDate(): Date
+            +getTotalCovariance(forecastDate: Date): Matrix
+            -getLikelihood(): Real
+            -calibrate()
+        }
+    }
+}
 !endsub
 
 
@@ -151,7 +175,8 @@ GeometricBrownianMotion -up-|> Simulation
 GeometricBrownianMotion --> "drift 1..*" DiscountCurve
 GeometricBrownianMotion --> "covariance" CovarianceTermStructure
 IndexDiscountCurve -up-|> DiscountCurve
-FlatHistoricalCovarianceForecast -up-|> CovarianceTermStructure
+FlatHistoricalCovarianceForecast -up--|> CovarianceTermStructure
+GarchCovarianceForecast -up--|> CovarianceTermStructure
 SimulatedQuoteProvider -up--|> QuoteProvider
 SimulatedQuoteProvider -up--> "originalQuoteProvider" QuoteProvider
 SimulatedQuoteProvider --> "amendment" Simulation
@@ -164,6 +189,7 @@ SimulationPricer --> "implementation" Simulation
 SimulationPricerFactory ..> SimulationPricer: create
 SimulationPricerFactory ..> IndexDiscountCurve: create
 SimulationPricerFactory ..> FlatHistoricalCovarianceForecast: create
+SimulationPricerFactory ..> GarchCovarianceForecast: create
 SimulationPricer ..> SimulatedQuoteProvider: create
 
 
