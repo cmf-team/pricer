@@ -1,8 +1,11 @@
+import os
+import sys
 from unittest import TestCase
 
 import apimoex
 import requests
 
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
 from Implementation.Markets.MoexQuoteProviderTest import sampleQuoteData
 
 
