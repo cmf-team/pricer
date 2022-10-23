@@ -23,13 +23,14 @@ class MoexQuoteProviderTest(TestCase):
     def testQuotes(self, mock_get_board_history):
         sampleDates = [
             date(2022, 1, 7),
+            date(2022, 1, 10),
             date(2022, 2, 10),
             date(2022, 10, 3),
             date(2022, 10, 10)
         ]
         mock_get_board_history.return_value = sampleQuoteData
         self.assertEqual(
-            [None, 328.93, 215.83, 163.89],
+            [None, None, 328.93, 215.83, 163.89],
             self.__testedQuoteProvider.getQuotes('GAZP', sampleDates)
         )
         mock_get_board_history.assert_called()
