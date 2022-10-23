@@ -1,5 +1,5 @@
 from datetime import date
-from unittest import TestCase, main
+from unittest import TestCase
 
 from Markets.MoexQuoteProvider import MoexQuoteProvider
 

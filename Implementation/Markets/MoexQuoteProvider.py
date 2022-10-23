@@ -37,7 +37,6 @@ class MoexQuoteProvider(QuoteProvider):
                     self.__boardId
                 )
             )
-            quoteData = pandas.DataFrame(quoteData)
             quoteData['TRADEDATE'] = pandas.to_datetime(quoteData['TRADEDATE'])
             result = resultDates.merge(
                 right=quoteData,
