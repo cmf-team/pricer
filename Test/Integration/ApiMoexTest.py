@@ -5,8 +5,15 @@ from unittest import TestCase
 import apimoex
 import requests
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
-from Implementation.Markets.MoexQuoteProviderTest import sampleQuoteData
+sys.path.append(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",
+        "..",
+        "Implementation"
+    )
+)
+from Markets.MoexQuoteProviderTest import sampleQuoteData
 
 
 class ApiMoexTest(TestCase):
