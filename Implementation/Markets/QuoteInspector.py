@@ -18,10 +18,7 @@ class QuoteInspector:
         startDate: date,
         endDate: date,
     ) -> None:
-        observationDates = pandas.date_range(
-            start=startDate,
-            end=endDate
-        ).tolist()
+        observationDates = self.__getHistoricalWindow(startDate, endDate)
         for ticker in tickers:
             observationPrices = self.__inspectedObject.getQuotes(
                 ticker,
@@ -41,6 +38,10 @@ class QuoteInspector:
             )
             chart.update_layout(title=ticker)
             chart.show()
+
+    @staticmethod
+    def __getHistoricalWindow(startDate: date, endDate: date) -> List[date]:
+        return pandas.date_range(start=startDate, end=endDate).tolist()
 
 
 # simple example for plotQuotes method
