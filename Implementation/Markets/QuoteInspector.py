@@ -80,13 +80,24 @@ class QuoteInspector:
         ]
 
 
-# simple example for plotQuotes method
+# Example of QuoteInspector use
 if __name__ == '__main__':
     sampleTickers = ['GAZP', 'SBER', 'OZON']
+    sampleStartDate = date(2022, 1, 1)
+    sampleEndDate = date(2022, 10, 10)
     sampleQuoteObject = MoexQuoteProvider('TQBR')
-    sampleChartObject = QuoteInspector(sampleQuoteObject)
-    sampleChartObject.plotQuotes(
-        sampleTickers,
-        date(2022, 1, 1),
-        date(2022, 10, 10)
+    sampleQuoteInspector = QuoteInspector(sampleQuoteObject)
+    sampleQuoteInspector.plotQuotes(
+        tickers=sampleTickers,
+        startDate=sampleStartDate,
+        endDate=sampleEndDate
+    )
+    sampleQuoteInspector.exportQuotes(
+        tickers=sampleTickers,
+        startDate=sampleStartDate,
+        endDate=sampleEndDate,
+        outputFilePath=os.path.join(
+            os.path.dirname(__file__),
+            "QuoteData.xlsx"
+        )
     )
