@@ -7,7 +7,7 @@ import apimoex
 from Markets.MoexQuoteProvider import MoexQuoteProvider
 
 # Quote data expected to be returned
-# by apimoex.get_board_history for GAZP ticker
+# by apimoex.get_board_history for GAZP ticker.
 sampleQuoteData = [
     {'TRADEDATE': '2022-01-07', 'CLOSE': None},
     {'TRADEDATE': '2022-02-10', 'CLOSE': 328.93},
