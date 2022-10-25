@@ -1,10 +1,10 @@
+from datetime import date
+from typing import List
+
 import apimoex
 import numpy
 import pandas
 import requests
-
-from datetime import date
-from typing import List
 
 from Products.QuoteProvider import QuoteProvider
 

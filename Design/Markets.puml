@@ -43,6 +43,8 @@ package StructuredProductPricer
         {
             {static} +create(inspectedObject: QuoteProvider)
             +plotQuotes(tickers: String[1..*], startDate: Date, endDate: Date)
+            +exportQuotes(tickers: String[1..*], startDate: Date, endDate: Date, outputFilePath: String)
+            {static} -getHistoricalWindow(startDate: Date, endDate: Date): Date[0..*]{ordered}
         }
     }
 }
