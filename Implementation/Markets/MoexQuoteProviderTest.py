@@ -2,6 +2,8 @@ from datetime import date
 from unittest import TestCase
 from unittest.mock import patch
 
+import apimoex
+
 from Markets.MoexQuoteProvider import MoexQuoteProvider
 
 
@@ -19,7 +21,7 @@ class MoexQuoteProviderTest(TestCase):
     def setUp(self) -> None:
         self.__testedQuoteProvider = MoexQuoteProvider("TQBR")
 
-    @patch('apimoex.get_board_history')
+    @patch.object(apimoex, apimoex.get_board_history.__name__)
     def testQuotes(self, mock_get_board_history):
         sampleDates = [
             date(2022, 1, 7),
