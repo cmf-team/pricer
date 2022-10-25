@@ -23,7 +23,7 @@ class MoexQuoteProviderTest(TestCase):
 
     # Patch function to avoid dependence from external service in unit test.
     @patch.object(apimoex, apimoex.get_board_history.__name__)
-    def testQuotes(self, mock_get_board_history):
+    def testProvidedQuotes(self, mock_get_board_history):
         sampleDates = [
             date(2022, 1, 7),
             date(2022, 1, 10),  # Date not in sampleQuoteData, None expected.
