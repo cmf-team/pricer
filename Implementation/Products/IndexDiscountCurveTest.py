@@ -19,10 +19,10 @@ class QuoteProviderStub(QuoteProvider):
             for key in self.__tickerValues.keys():
                 if ticker == key:
                     return [self.__tickerValues[key]]
+            return [None]
         else:
             raise NotImplementedError()
 
-        return [None]
 
 
 class VanillaStructuredProductTest(TestCase):
