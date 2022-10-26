@@ -29,7 +29,7 @@ class IndexDiscountCurve(DiscountCurve):
         rate = 0.
 
         if len(self.__durations) == 1:
-            rate = self.__interpolate(timeToPayment, 0)
+            rate = self.__rates[0]
         elif timeToPayment >= self.__durations[-1]:
             rate = self.__interpolate(timeToPayment, len(self.__durations) - 2)
         else:
@@ -51,7 +51,7 @@ class IndexDiscountCurve(DiscountCurve):
                     self.__rates[ratePosition]
                 ) /
                 (
-                    self.__durations[ratePosition+1] -
+                    self.__durations[ratePosition + 1] -
                     self.__durations[ratePosition]
                 )
             )
@@ -59,17 +59,17 @@ class IndexDiscountCurve(DiscountCurve):
         return result
 
     def __tenorToDuration(self, tenors: List[str]) -> List:
-        actDurations = []
+        durations = []
         for tenor in tenors:
             if tenor.endswith('D'):
-                actDurations.append(int(tenor[:-1]) / 365)
+                durations.append(int(tenor[:-1]) / 365)
             elif tenor.endswith('W'):
-                actDurations.append(int(tenor[:-1]) * 7 / 365)
+                durations.append(int(tenor[:-1]) * 7 / 365)
             elif tenor.endswith('M'):
-                actDurations.append(int(tenor[:-1]) * 30 / 365)
+                durations.append(int(tenor[:-1]) * 30 / 365)
             elif tenor.endswith('Y'):
-                actDurations.append(int(tenor[:-1]))
-        return actDurations
+                durations.append(int(tenor[:-1]))
+        return durations
 
     def getValuationDate(self) -> date:
         return self.__valuationDate

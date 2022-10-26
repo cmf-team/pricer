@@ -6,8 +6,8 @@ from Products.QuoteProvider import QuoteProvider
 
 
 class QuoteProviderStub(QuoteProvider):
-    def __init__(self, ticker_values: Dict):
-        self.__tickerValues = ticker_values
+    def __init__(self, tickerValues: Dict):
+        self.__tickerValues = tickerValues
 
     def getQuotes(
         self,
@@ -22,7 +22,7 @@ class QuoteProviderStub(QuoteProvider):
         else:
             raise NotImplementedError()
 
-        return None
+        return [None]
 
 
 class VanillaStructuredProductTest(TestCase):
@@ -37,6 +37,20 @@ class VanillaStructuredProductTest(TestCase):
                 'RATE1M': 3.6,
                 'RATE1Y': 12.9,
             }),
+        )
+
+        self.__testedCurveOneTenor = IndexDiscountCurve(
+            valuationDate=date(2022, 9, 1),
+            tenors=['1D'],
+            tickers=["RATE1D"],
+            market=QuoteProviderStub({
+                'RATE1D': 0.5,
+            }),
+        )
+    
+    def testCurveOneTenor(self):
+        self.assertEqual(0.999945, round(
+            self.__testedCurveOneTenor.getDiscountFactor(date(2022, 9, 5)), 6)
         )
 
     def testDayInterpolation(self):
