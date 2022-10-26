@@ -16,13 +16,15 @@ class IndexDiscountCurve(DiscountCurve):
     ) -> None:
         self.__valuationDate = valuationDate
         self.__durations = self.__tenorToDuration(tenors)
-        self.__rates = [
-            i[0] / 100 for i in
-            [market.getQuotes(
+        self.__durations = sorted(self.__durations)
+        self.__rates = [ 
+            market.getQuotes(
                 ticker,
                 [self.__valuationDate],
-            ) for ticker in tickers]
+            )[0] / 100 for ticker in tickers
         ]
+
+        self.__rates = sorted(self.__rates)
 
     def getDiscountFactor(self, paymentDate: date) -> float:
         timeToPayment = (paymentDate - self.__valuationDate).days / 365
@@ -38,7 +40,7 @@ class IndexDiscountCurve(DiscountCurve):
                     rate = self.__interpolate(timeToPayment, i - 1)
                     break
 
-        discontFactor = math.exp(-rate*timeToPayment)
+        discontFactor = math.exp(-rate * timeToPayment)
         return discontFactor
 
     def __interpolate(self, timeToPayment: float, ratePosition: int) -> float:
