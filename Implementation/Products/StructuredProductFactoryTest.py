@@ -34,18 +34,18 @@ class StructuredProductFactoryTest(TestCase):
 
     def testCreateAutocallMonthly(self):
         with patch.object(
-                Autocall,
-                '__init__',
-                return_value=None
+            Autocall,
+            '__init__',
+            return_value=None
         ) as mockAutocall:
             StructuredProductFactory.createAutocall(**self.__factoryInput)
             mockAutocall.assert_called_once_with(**self.__autocallInput)
 
     def testCreateAutocallQuarterly(self):
         with patch.object(
-                Autocall,
-                '__init__',
-                return_value=None
+            Autocall,
+            '__init__',
+            return_value=None
         ) as mockAutocall:
             factoryInput = self.__factoryInput.copy()
             factoryInput['paymentFrequency'] = PaymentFrequency.QUARTERLY

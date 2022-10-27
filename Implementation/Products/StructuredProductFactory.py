@@ -8,10 +8,10 @@ from Products.Autocall import Autocall
 
 
 class PaymentFrequency(Enum):
-    MONTHLY = 1
-    QUARTERLY = 3
-    SEMIANNUAL = 6
-    ANNUAL = 12
+    MONTHLY: int = 1
+    QUARTERLY: int = 3
+    SEMIANNUAL: int = 6
+    ANNUAL: int = 12
 
 
 class StructuredProductFactory:

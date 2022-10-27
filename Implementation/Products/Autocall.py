@@ -49,16 +49,13 @@ class Autocall(CashFlow):
         returns = quotes[:, 1] / quotes[:, 0]
         return returns.min()
 
-    def __isRecallDate(
+    def __isAutocallBarrierHit(
         self,
         couponDate: date,
         market: QuoteProvider,
     ) -> bool:
         worstReturn = self.__getWorstReturn(couponDate, market)
-        if (
-                worstReturn > self.__autocallBarrier or
-                couponDate == self.__couponDates[-1]
-        ):
+        if worstReturn > self.__autocallBarrier:
             return True
         else:
             return False
@@ -93,14 +90,20 @@ class Autocall(CashFlow):
             return 0
 
         for couponDateIndex in range(paymentDateIndex):
-            if self.__isRecallDate(
-                    self.__couponDates[couponDateIndex],
-                    market
+            if self.__isAutocallBarrierHit(
+                self.__couponDates[couponDateIndex],
+                market
             ):
                 return 0
 
         paymentAmount = 0
-        if self.__isRecallDate(self.__couponDates[paymentDateIndex], market):
+        if (
+            paymentDate == self.__couponDates[-1] or
+            self.__isAutocallBarrierHit(
+                self.__couponDates[paymentDateIndex],
+                market
+            )
+        ):
             paymentAmount += 1
 
         if self.__getWorstReturn(paymentDate, market) >= self.__couponBarrier:
