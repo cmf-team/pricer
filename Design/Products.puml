@@ -70,6 +70,20 @@ package StructuredProductPricer
 !endsub
 
 
+!startsub StructuredProductFactory
+package StructuredProductPricer
+{
+    package Products
+    {
+        class StructuredProductFactory
+        {
+            {static} +createAutocall(underlyings: String[1..*], couponBarrier: Real, autocallBarrier: Real,\n startDate: Date, maturityDate: Date, paymentFrequency: PaymentFrequency,\n couponRate: Real, memoryFeature: Boolean): Autocall
+        }
+    }
+}
+!endsub
+
+
 !startsub Autocall
 package StructuredProductPricer
 {
@@ -154,6 +168,7 @@ Autocall -up-|> CashFlow
 Autocall -up-|> Derivative
 PricerFactory ..> Pricer
 PricerFactory ..> QuoteProvider
+StructuredProductFactory ..> Autocall
 
 
 @enduml
