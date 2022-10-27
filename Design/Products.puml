@@ -77,9 +77,20 @@ package StructuredProductPricer
     {
         class Autocall
         {
+            +underlyings: String[1..*]
+            +couponBarrier: Real
+            +autocallBarrier: Real
+            +startDate: Date
+            +maturityDate: Date
+            +couponDates: Date[1..*]{ordered}
+            +couponAmounts: Real[1..*]{ordered}
+            +memoryFeature: Boolean
             +getPaymentDates(): Date[1..*]
-            +getPaymentAmount(paymentDate: Date, market: QuoteProvider)
-            +getBasePrice(valuationDate: Date, pricer: Pricer)
+            +getPaymentAmount(paymentDate: Date, market: QuoteProvider): Real
+            +getBasePrice(valuationDate: Date, pricer: Pricer): Real
+            -getWorstReturn(paymentDate: Date, market: QuoteProvider): Real
+            -autocallBarrierHit(couponDate: Date, market: QuoteProvider): Boolean
+            -getMemorizedCoupons(paymentDate: Date, market: QuoteProvider): Real
         }
     }
 }
