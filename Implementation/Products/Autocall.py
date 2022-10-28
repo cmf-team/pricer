@@ -15,7 +15,6 @@ class Autocall(CashFlow):
         couponBarrier: float,
         autocallBarrier: float,
         startDate: date,
-        maturityDate: date,
         couponDates: List[date],
         couponAmounts: List[float],
         memoryFeature: bool
@@ -24,7 +23,6 @@ class Autocall(CashFlow):
         self.__couponBarrier = couponBarrier
         self.__autocallBarrier = autocallBarrier
         self.__startDate = startDate
-        self.__maturityDate = maturityDate
         self.__couponDates = couponDates
         self.__couponAmounts = couponAmounts
         self.__memoryFeature = memoryFeature

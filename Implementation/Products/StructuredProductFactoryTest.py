@@ -3,7 +3,7 @@ from unittest import TestCase
 from unittest.mock import patch
 
 from Products.Autocall import Autocall
-from Products.StructuredProductFactory import PaymentFrequency, \
+from Products.StructuredProductFactory import CouponFrequency, \
     StructuredProductFactory
 
 
@@ -14,8 +14,8 @@ class StructuredProductFactoryTest(TestCase):
             'couponBarrier': 1,
             'autocallBarrier': 1.1,
             'startDate': date(2022, 9, 1),
-            'maturityDate': date(2022, 12, 1),
-            'paymentFrequency': PaymentFrequency.MONTHLY,
+            'couponFrequency': CouponFrequency.MONTHLY,
+            'couponCount': 3,
             'couponRate': 0.1,
             'memoryFeature': False
         }
@@ -24,7 +24,6 @@ class StructuredProductFactoryTest(TestCase):
             'couponBarrier': 1,
             'autocallBarrier': 1.1,
             'startDate': date(2022, 9, 1),
-            'maturityDate': date(2022, 12, 1),
             'couponDates': [
                 date(2022, 10, 1), date(2022, 11, 1), date(2022, 12, 1)
             ],
@@ -48,7 +47,8 @@ class StructuredProductFactoryTest(TestCase):
             return_value=None
         ) as mockAutocall:
             factoryInput = self.__factoryInput.copy()
-            factoryInput['paymentFrequency'] = PaymentFrequency.QUARTERLY
+            factoryInput['couponFrequency'] = CouponFrequency.QUARTERLY
+            factoryInput['couponCount'] = 1
 
             autocallInput = self.__autocallInput.copy()
             autocallInput['couponDates'] = [date(2022, 12, 1)]
@@ -63,11 +63,4 @@ class StructuredProductFactoryTest(TestCase):
             barrierCheck['couponBarrier'] = 1.2
             StructuredProductFactory.createAutocall(
                 **barrierCheck
-            )
-
-        with self.assertRaisesRegex(ValueError, 'dates'):
-            datesCheck = self.__factoryInput.copy()
-            datesCheck['startDate'] = date(2023, 9, 1)
-            StructuredProductFactory.createAutocall(
-                **datesCheck
             )

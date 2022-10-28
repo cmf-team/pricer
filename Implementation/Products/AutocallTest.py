@@ -55,7 +55,6 @@ class AutocallTest(TestCase):
             couponBarrier=1,
             autocallBarrier=1.1,
             startDate=date(2022, 9, 1),
-            maturityDate=date(2022, 12, 1),
             couponDates=[
                 date(2022, 10, 1), date(2022, 11, 1), date(2022, 12, 1)
             ],
@@ -68,7 +67,6 @@ class AutocallTest(TestCase):
             couponBarrier=1,
             autocallBarrier=1.1,
             startDate=date(2022, 9, 1),
-            maturityDate=date(2022, 12, 1),
             couponDates=[date(2022, 12, 1)],
             couponAmounts=[0.1 * 91 / 365],
             memoryFeature=False
@@ -79,7 +77,6 @@ class AutocallTest(TestCase):
             couponBarrier=1,
             autocallBarrier=1,
             startDate=date(2022, 9, 1),
-            maturityDate=date(2022, 12, 1),
             couponDates=[
                 date(2022, 10, 1), date(2022, 11, 1), date(2022, 12, 1)
             ],
