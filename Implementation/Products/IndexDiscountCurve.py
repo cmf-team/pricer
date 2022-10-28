@@ -1,6 +1,6 @@
 import math
 from datetime import date
-from typing import List
+from typing import List, Optional
 
 from Products.DiscountCurve import DiscountCurve
 from Products.QuoteProvider import QuoteProvider
@@ -17,14 +17,12 @@ class IndexDiscountCurve(DiscountCurve):
         self.__valuationDate = valuationDate
         self.__durations = self.__tenorToDuration(tenors)
         self.__durations = sorted(self.__durations)
-        self.__rates = [ 
+        self.__rates = [
             market.getQuotes(
                 ticker,
                 [self.__valuationDate],
             )[0] / 100 for ticker in tickers
         ]
-
-        self.__rates = sorted(self.__rates)
 
     def getDiscountFactor(self, paymentDate: date) -> float:
         timeToPayment = (paymentDate - self.__valuationDate).days / 365
@@ -33,7 +31,7 @@ class IndexDiscountCurve(DiscountCurve):
         if len(self.__durations) == 1:
             rate = self.__rates[0]
         elif timeToPayment >= self.__durations[-1]:
-            rate = self.__interpolate(timeToPayment, len(self.__durations) - 2)
+            rate = self.__interpolate(timeToPayment, extrapolate=True)
         else:
             for i in range(1, len(self.__durations)):
                 if timeToPayment < self.__durations[i]:
@@ -43,21 +41,34 @@ class IndexDiscountCurve(DiscountCurve):
         discontFactor = math.exp(-rate * timeToPayment)
         return discontFactor
 
-    def __interpolate(self, timeToPayment: float, ratePosition: int) -> float:
+    def __interpolate(
+        self,
+        timeToPayment: float,
+        ratePosition: Optional[int] = None,
+        extrapolate: bool = False,
+    ) -> float:
+        if extrapolate:
+            first_point = 0
+            last_point = len(self.__rates) - 1
+        else:
+            first_point = ratePosition
+            last_point = ratePosition + 1
+
         result = (
-            self.__rates[ratePosition] +
-            (timeToPayment - self.__durations[ratePosition]) *
+            self.__rates[first_point] +
+            (timeToPayment - self.__durations[first_point]) *
             (
                 (
-                    self.__rates[ratePosition + 1] -
-                    self.__rates[ratePosition]
+                    self.__rates[last_point] -
+                    self.__rates[first_point]
                 ) /
                 (
-                    self.__durations[ratePosition + 1] -
-                    self.__durations[ratePosition]
+                    self.__durations[last_point] -
+                    self.__durations[first_point]
                 )
             )
         )
+
         return result
 
     def __tenorToDuration(self, tenors: List[str]) -> List:
