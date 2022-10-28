@@ -1,8 +1,8 @@
+import pandas
 from datetime import date
 from unittest import TestCase
 
-import MoexGCurveQuoteProvider
-
+from Markets.MoexGCurveQuoteProvider import MoexGCurveQuoteProvider
 from Products.QuoteProvider import QuoteProvider
 
 sampleQuoteData = pandas.DataFrame(
