@@ -6,7 +6,7 @@ from typing import List
 from Products.QuoteProvider import QuoteProvider
 
 class MoexGCurveQuoteProvider(QuoteProvider):
-    def __init__(self): None
+    def __init__(self) -> None:
       pass
 
     def getQuotes(self, ticker: str, observationDates: List[date]) -> List[float]:
