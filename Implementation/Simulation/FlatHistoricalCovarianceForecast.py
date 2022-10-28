@@ -17,7 +17,7 @@ class FlatHistoricalCovarianceForecast(CovarianceTermStructure):
         maxNansRate: float = 0.3
     ):
         self.__underlyings = underlyings
-        self.__observationDate = observationDate,
+        self.__observationDate = observationDate
         self.__market = market
         self.__historicalWindow = [
             historyDate.date() for historyDate in rrule(
@@ -25,7 +25,7 @@ class FlatHistoricalCovarianceForecast(CovarianceTermStructure):
                 dtstart=observationDate - timedelta(days=historicalWindowSize),
                 until=observationDate
             )
-        ]
+        ][:-1]
         self.__maxNansRate = maxNansRate
         self.__covarianceMatrix = None
 
