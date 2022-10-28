@@ -15,7 +15,7 @@ sampleQuoteData = pandas.DataFrame(
     index=[
             'MOEXGCURVE3M'
             ]
-
+)
 
 class MoexGCurveQuoteProviderTest(TestCase):
     
