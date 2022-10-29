@@ -17,7 +17,7 @@ class GeometricBrownianMotion(Simulation):
         initialValues: List[float],
         drift: List[DiscountCurve],
         covariance: CovarianceTermStructure,
-        simulationCount: int
+        simulationNumber: int
     ):
         self.__variableNames = variableNames
         self.__observationDate = observationDate
@@ -25,7 +25,7 @@ class GeometricBrownianMotion(Simulation):
         self.__initialValues = initialValues
         self.__drift = drift
         self.__covariance = covariance
-        self.__simulationCount = simulationCount
+        self.__simulationNumber = simulationNumber
         self.__simulationResult = None
 
         self.__muValues = self.__getMuValues()
@@ -49,7 +49,7 @@ class GeometricBrownianMotion(Simulation):
             (mu - sigma / 2) + numpy.random.multivariate_normal(
                 mean=numpy.zeros(d),
                 cov=self.__getRandomCovariance(T1, T2),
-                size=self.__simulationCount
+                size=self.__simulationNumber
             )
         )
         return initValues * path
@@ -65,14 +65,14 @@ class GeometricBrownianMotion(Simulation):
         return numpy.array(discountFactorsDiv)
 
     def __getSigmaValues(self):
-        variablesCount = len(self.__variableNames)
+        variablesNumber = len(self.__variableNames)
         totalCovarianceValues = []
         for simulationDate in self.__simulationDates:
             C = self.__covariance.getTotalCovariance(
                 forecastDate=simulationDate
             )
             simulationDateCovariance = []
-            for idx in range(variablesCount):
+            for idx in range(variablesNumber):
                 simulationDateCovariance.append(C[idx, idx])
         totalCovarianceValues.append(simulationDateCovariance)
         totalCovarianceValues = numpy.array(totalCovarianceValues)
