@@ -2,7 +2,7 @@ from datetime import date
 from typing import Dict, List
 from unittest import TestCase
 
-from Products.IndexDiscountCurve import IndexDiscountCurve
+from Simulation.IndexDiscountCurve import IndexDiscountCurve
 from Products.QuoteProvider import QuoteProvider
 
 
@@ -46,9 +46,8 @@ class QuoteProviderStub(QuoteProvider):
     ) -> List[float]:
 
         if observationDates == [date(2022, 9, 1)]:
-            for key in self.__tickerValues.keys():
-                if ticker == key:
-                    return [self.__tickerValues[key]]
+            if ticker in self.__tickerValues.keys():
+                return [self.__tickerValues[ticker]]
             return [None]
         else:
             raise NotImplementedError()

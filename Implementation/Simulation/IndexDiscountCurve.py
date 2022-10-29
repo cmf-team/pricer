@@ -2,7 +2,7 @@ import math
 from datetime import date
 from typing import List, Optional
 
-from Products.DiscountCurve import DiscountCurve
+from Simulation.DiscountCurve import DiscountCurve
 from Products.QuoteProvider import QuoteProvider
 
 
@@ -16,7 +16,6 @@ class IndexDiscountCurve(DiscountCurve):
     ) -> None:
         self.__valuationDate = valuationDate
         self.__durations = self.__tenorToDuration(tenors)
-        self.__durations = sorted(self.__durations)
         self.__rates = [
             market.getQuotes(
                 ticker,
@@ -38,8 +37,8 @@ class IndexDiscountCurve(DiscountCurve):
                     rate = self.__interpolate(timeToPayment, i - 1)
                     break
 
-        discontFactor = math.exp(-rate * timeToPayment)
-        return discontFactor
+        discountFactor = math.exp(-rate * timeToPayment)
+        return discountFactor
 
     def __interpolate(
         self,
@@ -48,23 +47,23 @@ class IndexDiscountCurve(DiscountCurve):
         extrapolate: bool = False,
     ) -> float:
         if extrapolate:
-            first_point = 0
-            last_point = len(self.__rates) - 1
+            firstPoint = 0
+            lastPoint = len(self.__rates) - 1
         else:
-            first_point = ratePosition
-            last_point = ratePosition + 1
+            firstPoint = ratePosition
+            lastPoint = ratePosition + 1
 
         result = (
-            self.__rates[first_point] +
-            (timeToPayment - self.__durations[first_point]) *
+            self.__rates[firstPoint] +
+            (timeToPayment - self.__durations[firstPoint]) *
             (
                 (
-                    self.__rates[last_point] -
-                    self.__rates[first_point]
+                    self.__rates[lastPoint] -
+                    self.__rates[firstPoint]
                 ) /
                 (
-                    self.__durations[last_point] -
-                    self.__durations[first_point]
+                    self.__durations[lastPoint] -
+                    self.__durations[firstPoint]
                 )
             )
         )
