@@ -6,3 +6,7 @@ class Matrix(ABC):
     @abstractmethod
     def __getitem__(self, *args: Tuple[int, int]):
         pass
+
+    @abstractmethod
+    def __sub__(self, value):
+        pass
