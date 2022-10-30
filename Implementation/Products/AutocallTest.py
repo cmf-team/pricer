@@ -62,16 +62,6 @@ class AutocallTest(TestCase):
             memoryFeature=False
         )
 
-        self.__testedNoMemoryQuarterly = Autocall(
-            underlyings=['GAZP', 'YNDX'],
-            couponBarrier=1,
-            autocallBarrier=1.1,
-            startDate=date(2022, 9, 1),
-            couponDates=[date(2022, 12, 1)],
-            couponAmounts=[0.1 * 91 / 365],
-            memoryFeature=False
-        )
-
         self.__testedMemoryMonthly = Autocall(
             underlyings=['GAZP', 'YNDX'],
             couponBarrier=1,
@@ -80,28 +70,28 @@ class AutocallTest(TestCase):
             couponDates=[
                 date(2022, 10, 1), date(2022, 11, 1), date(2022, 12, 1)
             ],
-            couponAmounts=[0.2 * 30 / 365, 0.2 * 31 / 365, 0.2 * 30 / 365],
+            couponAmounts=[0.016438356, 0.016986301, 0.016438356],
             memoryFeature=True
         )
 
+        self.__sampleMarket = QuoteProviderStub()
+
     def testZeroCouponNoMemory(self):
-        sampleMarket = QuoteProviderStub()
         self.assertEqual(
             0,
             self.__testedNoMemoryMonthly.getPaymentAmount(
                 date(2022, 10, 1),
-                sampleMarket
+                self.__sampleMarket
             )
         )
 
     def testNonZeroCouponNoMemory(self):
-        sampleMarket = QuoteProviderStub()
         with self.subTest():
             self.assertAlmostEqual(
                 0.1 * (date(2022, 11, 1) - date(2022, 10, 1)).days / 365,
                 self.__testedNoMemoryMonthly.getPaymentAmount(
                     date(2022, 11, 1),
-                    sampleMarket
+                    self.__sampleMarket
                 )
             )
         with self.subTest():
@@ -109,27 +99,16 @@ class AutocallTest(TestCase):
                 1 + 0.1 * (date(2022, 12, 1) - date(2022, 11, 1)).days / 365,
                 self.__testedNoMemoryMonthly.getPaymentAmount(
                     date(2022, 12, 1),
-                    sampleMarket
+                    self.__sampleMarket
                 )
             )
 
-    def testNonZeroCouponNoMemoryQuarterly(self):
-        sampleMarket = QuoteProviderStub()
-        self.assertAlmostEqual(
-            1 + 0.1 * (date(2022, 12, 1) - date(2022, 9, 1)).days / 365,
-            self.__testedNoMemoryQuarterly.getPaymentAmount(
-                date(2022, 12, 1),
-                sampleMarket
-            ),
-        )
-
     def testMemoryFeature(self):
-        sampleMarket = QuoteProviderStub()
         self.assertAlmostEqual(
             (1 + 0.2 * (date(2022, 10, 1) - date(2022, 9, 1)).days / 365 +
              0.2 * (date(2022, 11, 1) - date(2022, 10, 1)).days / 365),
             self.__testedMemoryMonthly.getPaymentAmount(
                 date(2022, 11, 1),
-                sampleMarket
+                self.__sampleMarket
             )
         )

@@ -61,6 +61,4 @@ class StructuredProductFactoryTest(TestCase):
         with self.assertRaisesRegex(ValueError, 'barrier'):
             barrierCheck = self.__factoryInput.copy()
             barrierCheck['couponBarrier'] = 1.2
-            StructuredProductFactory.createAutocall(
-                **barrierCheck
-            )
+            StructuredProductFactory.createAutocall(**barrierCheck)
