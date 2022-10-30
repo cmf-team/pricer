@@ -98,7 +98,8 @@ package StructuredProductPricer
             -couponDates: Date[1..*]{ordered}
             -couponAmounts: Real[1..*]{ordered}
             -memoryFeature: Boolean
-            {static} +create(underlyings: String[1..*], couponBarrier: Real, autocallBarrier: Real, startDate: Date, couponDates: Date[1..*]{ordered}, couponAmounts: Real[1..*]{ordered}, memoryFeature: Boolean)
+            -putStrike: Real[0..1]
+            {static} +create(underlyings: String[1..*], couponBarrier: Real, autocallBarrier: Real, startDate: Date, couponDates: Date[1..*]{ordered}, couponAmounts: Real[1..*]{ordered}, memoryFeature: Boolean, putStrike[0..1]: Real)
             +getPaymentDates(): Date[1..*]
             +getPaymentAmount(paymentDate: Date, market: QuoteProvider): Real
             +getBasePrice(valuationDate: Date, pricer: Pricer): Real
