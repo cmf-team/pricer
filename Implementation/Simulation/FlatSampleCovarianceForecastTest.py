@@ -4,7 +4,7 @@ from unittest import TestCase
 import numpy
 
 from Products.QuoteProvider import QuoteProvider
-from Simulation.FlatHistoricalCovarianceForecast import \
+from Simulation.FlatSampleCovarianceForecast import \
     FlatSampleCovarianceForecast
 
 GAZPQuotes = {
