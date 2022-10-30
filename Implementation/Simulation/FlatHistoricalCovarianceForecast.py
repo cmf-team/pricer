@@ -1,49 +1,56 @@
-from datetime import date, timedelta
+from datetime import date
 
 import numpy
 from dateutil.rrule import DAILY, rrule
+from pandas.tseries.offsets import BusinessDay
 
 from Products.QuoteProvider import QuoteProvider
 from Simulation.CovarianceTermStructure import CovarianceTermStructure
 
 
-class FlatHistoricalCovarianceForecast(CovarianceTermStructure):
+class FlatSampleCovarianceForecast(CovarianceTermStructure):
+    """
+    missedQuotesLimit: The maximum percentage of missed quotes. If there are
+    \n more missing quotes that this rate, the function throws an exception.
+    """
+
     def __init__(
         self,
         underlyings: list[str],
         observationDate: date,
-        historicalWindowSize: int,
+        samplelWindowSize: int,
         market: QuoteProvider,
-        maxNansRate: float = 0.3
+        missedQuotesLimit: float = 0.3
     ):
         self.__underlyings = underlyings
         self.__observationDate = observationDate
         self.__market = market
-        self.__historicalWindow = [
-            historyDate.date() for historyDate in rrule(
+        self.__sampleWindow = [
+            sampleDate.date() for sampleDate in rrule(
                 DAILY,
-                dtstart=observationDate - timedelta(days=historicalWindowSize),
-                until=observationDate
+                dtstart=observationDate - BusinessDay(samplelWindowSize),
+                until=observationDate,
+                byweekday=(0, 1, 2, 3, 4)
             )
-        ][:-1]
-        self.__maxNansRate = maxNansRate
+        ][1:]
+        self.__missedQuotesLimit = missedQuotesLimit
         self.__covarianceMatrix = None
 
     def __checkNansRate(self, quotes) -> None:
         if (
             numpy.isnan(quotes).all(axis=0).sum() >=
-            int(self.__maxNansRate * quotes.shape[1])
+            int(self.__missedQuotesLimit * quotes.shape[1])
         ):
             raise ValueError(
-                'NaNs rate in historical quotes is higher than '
-                'maxNansRate parameter.'
+                'The percentage of missed quotes is higher than '
+                'missedQuotesLimit parameter.'
             )
 
     def __removeNans(self, quotes) -> numpy.ndarray:
         indicesToDelete = numpy.isnan(quotes).any(axis=0)
 
-        self.__historicalWindow = numpy.delete(
-            self.__historicalWindow,
+        self.__sampleWindow = numpy.delete(
+            self.__sampleWindow,
             indicesToDelete
         )
         return numpy.delete(quotes, indicesToDelete, axis=1)
@@ -51,31 +58,35 @@ class FlatHistoricalCovarianceForecast(CovarianceTermStructure):
     def __getLogChange(self) -> numpy.ndarray:
         quotes = numpy.array(
             [
-                self.__market.getQuotes(underlying, self.__historicalWindow)
+                self.__market.getQuotes(underlying, self.__sampleWindow)
                 for underlying in self.__underlyings
             ]
         )
 
         self.__checkNansRate(quotes)
-
-        if numpy.isnan(quotes).any():
-            quotes = self.__removeNans(quotes)
+        quotes = self.__removeNans(quotes)
 
         return numpy.diff(numpy.log(quotes), axis=1)
 
-    def __initializeCovarianceMatrix(self) -> None:
-        logChange = self.__getLogChange()
-        historyLength = (
-            self.__historicalWindow[-1] - self.__historicalWindow[0]
-        ).days
-        self.__covarianceMatrix = logChange @ logChange.T / historyLength
+    def __getSampleCovarianceMatrix(self) -> None:
+        if self.__covarianceMatrix is not None:
+            return
+
+        logReturns = self.__getLogChange()
+        sampleLength = numpy.busday_count(
+            self.__sampleWindow[0],
+            self.__sampleWindow[-1]
+        )
+        self.__covarianceMatrix = logReturns @ logReturns.T / sampleLength
 
     def getObservationDate(self) -> date:
         return self.__observationDate
 
     def getTotalCovariance(self, forecastDate: date) -> numpy.ndarray:
-        if self.__covarianceMatrix is None:
-            self.__initializeCovarianceMatrix()
+        self.__getSampleCovarianceMatrix()
 
-        forecastLength = (forecastDate - self.__observationDate).days
+        forecastLength = numpy.busday_count(
+            self.__observationDate,
+            forecastDate
+        )
         return self.__covarianceMatrix * forecastLength
