@@ -2,8 +2,9 @@ from datetime import date
 from typing import Dict, List
 from unittest import TestCase
 
-from Simulation.IndexDiscountCurve import IndexDiscountCurve
 from Products.QuoteProvider import QuoteProvider
+
+from Simulation.IndexDiscountCurve import IndexDiscountCurve
 
 
 class QuoteProviderStub(QuoteProvider):
@@ -19,19 +20,18 @@ class QuoteProviderStub(QuoteProvider):
     def __sortTickers(self, quoteData):
         result = []
 
-        sortOrder = {}
+        sortOrder = {'D': [], 'W': [], 'M': [], 'Y': []}
         for quote in quoteData.items():
             durationType = quote[0][-1]
-            if durationType not in sortOrder:
-                sortOrder[durationType] = []
-
             sortOrder[durationType].append(quote)
 
-        sortOrder = sorted(
-            sortOrder.items(),
-            key=lambda x: int(x[1][0][0][4:-1]),
-        )
-        for durQuotes in sortOrder:
+        popKeys = [key for key in sortOrder if len(sortOrder[key]) == 0]
+        [sortOrder.pop(key) for key in popKeys]
+
+        for k in sortOrder.keys():
+            sortOrder[k] = sorted(sortOrder[k], key=lambda x: int(x[0][4:-1]))
+
+        for durQuotes in sortOrder.items():
             result.extend(durQuotes[1])
 
         return dict(result)
@@ -158,7 +158,20 @@ class VanillaStructuredProductTest(TestCase):
 
     def testExtrapolation(self):
         self.assertAlmostEqual(
-            0.1338779,
+            0.5966924,
             self.__testedCurve.getDiscountFactor(date(2026, 9, 1)),
             6,
+        )
+
+    def testSameRates(self):
+
+        self.assertRaises(
+            ValueError,
+            IndexDiscountCurve,
+            valuationDate=date(2022, 9, 1),
+            tenors=['1D', '1D'],
+            tickers=["RATE1D", "RATE1D"],
+            market=QuoteProviderStub({
+                'RATE1D': 1.5,
+            }),
         )

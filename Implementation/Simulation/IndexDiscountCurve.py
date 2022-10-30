@@ -1,9 +1,11 @@
 import math
 from datetime import date
-from typing import List, Optional
+from typing import List
+
+from numpy import interp
+from Products.QuoteProvider import QuoteProvider
 
 from Simulation.DiscountCurve import DiscountCurve
-from Products.QuoteProvider import QuoteProvider
 
 
 class IndexDiscountCurve(DiscountCurve):
@@ -14,61 +16,58 @@ class IndexDiscountCurve(DiscountCurve):
         tickers: List[str],
         market: QuoteProvider
     ) -> None:
+        if (
+            len(set(tenors)) != len(tenors) or
+            len(set(tickers)) != len(tickers)
+        ):
+            raise ValueError('Nonunique tickres or tenors')
+
         self.__valuationDate = valuationDate
-        self.__durations = self.__tenorToDuration(tenors)
+        self.__durations = self.__tenorToDuration(
+            self.__sort(tenors, type='tenors')
+        )
         self.__rates = [
             market.getQuotes(
                 ticker,
                 [self.__valuationDate],
-            )[0] / 100 for ticker in tickers
+            )[0] / 100 for ticker in self.__sort(tickers, type='tickers')
         ]
+
+    def __sort(self, data, type):
+        result = []
+        sortOrder = {'D': [], 'W': [], 'M': [], 'Y': []}
+        for sample in data:
+            sortOrder[sample[-1]].append(sample)
+
+        popKeys = [key for key in sortOrder if len(sortOrder[key]) == 0]
+        [sortOrder.pop(key) for key in popKeys]
+
+        for k in sortOrder.keys():
+            if type == 'tenors':
+                sortOrder[k] = sorted(sortOrder[k], key=lambda x: int(x[:-1]))
+            elif type == 'tickers':
+                sortOrder[k] = sorted(sortOrder[k], key=lambda x: int(x[4:-1]))
+            else:
+                raise ValueError('Only tickers and tenors are allowed')
+
+        for durQuotes in sortOrder.items():
+            result.extend(durQuotes[1])
+
+        return result
 
     def getDiscountFactor(self, paymentDate: date) -> float:
         timeToPayment = (paymentDate - self.__valuationDate).days / 365
         rate = 0.
 
-        if len(self.__durations) == 1:
+        if timeToPayment >= self.__durations[-1]:
+            rate = self.__rates[-1]
+        elif timeToPayment < self.__durations[0]:
             rate = self.__rates[0]
-        elif timeToPayment >= self.__durations[-1]:
-            rate = self.__interpolate(timeToPayment, extrapolate=True)
         else:
-            for i in range(1, len(self.__durations)):
-                if timeToPayment < self.__durations[i]:
-                    rate = self.__interpolate(timeToPayment, i - 1)
-                    break
+            rate = interp(timeToPayment, self.__durations, self.__rates)
 
         discountFactor = math.exp(-rate * timeToPayment)
         return discountFactor
-
-    def __interpolate(
-        self,
-        timeToPayment: float,
-        ratePosition: Optional[int] = None,
-        extrapolate: bool = False,
-    ) -> float:
-        if extrapolate:
-            firstPoint = 0
-            lastPoint = len(self.__rates) - 1
-        else:
-            firstPoint = ratePosition
-            lastPoint = ratePosition + 1
-
-        result = (
-            self.__rates[firstPoint] +
-            (timeToPayment - self.__durations[firstPoint]) *
-            (
-                (
-                    self.__rates[lastPoint] -
-                    self.__rates[firstPoint]
-                ) /
-                (
-                    self.__durations[lastPoint] -
-                    self.__durations[firstPoint]
-                )
-            )
-        )
-
-        return result
 
     def __tenorToDuration(self, tenors: List[str]) -> List:
         durations = []
