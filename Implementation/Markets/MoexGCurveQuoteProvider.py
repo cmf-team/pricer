@@ -35,18 +35,18 @@ class MoexGCurveQuoteProvider(QuoteProvider):
                 + str(observationDate)
             )
 
-                data = requests.get(url).json()
-                
-                data = pandas.DataFrame(
-                    data['yearyields']['data'],
-                    columns = data['yearyields']['columns']
-                )
+            data = requests.get(url).json()
 
-                if not data.empty:
-                    self.gcurve[observationDate]=data['value'].values
-                else:
-                    self.gcurve[observationDate]=None
-            
-                quotes.append(self.gcurve.loc[ticker, observationDate])
+            data = pandas.DataFrame(
+                data['yearyields']['data'],
+                columns = data['yearyields']['columns']
+            )
+
+            if not data.empty:
+                self.gcurve[observationDate]=data['value'].values
+            else:
+                self.gcurve[observationDate]=None
+
+            quotes.append(self.gcurve.loc[ticker, observationDate])
         
         return quotes
