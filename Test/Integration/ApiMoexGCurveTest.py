@@ -33,7 +33,7 @@ class ApiMoexGCurveTest(TestCase):
                         columns = data['yearyields']['columns'])
 
             if not data.empty:
-                serviceResponse.append(data.loc[data['period'] == 0.25]['value'].values[0])
+                serviceResponse.append(data.loc[data['period'] == tenor[0]]['value'].values[0])
             else:
                 serviceResponse.append(None)
 
