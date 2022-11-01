@@ -1,13 +1,22 @@
-from Products.QuoteProvider import QuoteProvider
-from typing import Iterable, List
 from datetime import date
+from typing import Iterable
+from typing import List
+
+from Products.QuoteProvider import QuoteProvider
 
 
 class CompositeQuoteProvider(QuoteProvider):
-    def init(self, components: Iterable[QuoteProvider]):
+    def init(
+        self,
+        components: Iterable[QuoteProvider]
+    ):
         self.__components = components
 
-    def getQuotes(self, ticker: str, observationDates: List[date]) -> List[float]:
+    def getQuotes(
+        self,
+        ticker: str,
+        observationDates: List[date]
+    ) -> List[float]:
         result = [None] * len(observationDates)
         for component in self.__components:
             componentQuotes = component.getQuotes(ticker, observationDates)
