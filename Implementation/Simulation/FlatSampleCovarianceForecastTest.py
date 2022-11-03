@@ -8,35 +8,20 @@ from Simulation.FlatSampleCovarianceForecast import \
     FlatSampleCovarianceForecast
 
 GAZPQuotes = {
-    date(2022, 10, 27): 100,
-    date(2022, 10, 28): 105,
-    date(2022, 10, 31): numpy.NaN,
-    date(2022, 11, 1): 106,
+    date(2021, 11, 1): 110,
+    date(2022, 10, 28): 135,
+    date(2022, 11, 1): 136,
 }
 
 YNDXQuotes = {
-    date(2022, 10, 27): 150,
-    date(2022, 10, 28): 130,
-    date(2022, 10, 31): 155,
-    date(2022, 11, 1): 155,
-}
-
-YNDXQuotesExceptions = {
-    date(2022, 10, 27): 150,
-    date(2022, 10, 28): numpy.NaN,
-    date(2022, 10, 31): numpy.NaN,
+    date(2021, 11, 1): 140,
+    date(2022, 10, 28): 155,
+    date(2022, 10, 31): 145,
     date(2022, 11, 1): 155,
 }
 
 
 class QuoteProviderStub(QuoteProvider):
-    def __init__(self, exception: bool = False):
-        self.__GAZPQuotes = GAZPQuotes
-        if exception:
-            self.__YNDXQuotes = YNDXQuotesExceptions
-        else:
-            self.__YNDXQuotes = YNDXQuotes
-
     def getQuotes(
         self,
         ticker: str,
@@ -46,7 +31,7 @@ class QuoteProviderStub(QuoteProvider):
         if ticker == "GAZP":
             try:
                 return [
-                    self.__GAZPQuotes.get(observationDate) for
+                    GAZPQuotes.get(observationDate) for
                     observationDate in observationDates
                 ]
             except KeyError:
@@ -55,28 +40,28 @@ class QuoteProviderStub(QuoteProvider):
         if ticker == "YNDX":
             try:
                 return [
-                    self.__YNDXQuotes.get(observationDate) for
+                    YNDXQuotes.get(observationDate) for
                     observationDate in observationDates
                 ]
             except KeyError:
                 raise NotImplementedError()
 
 
-class AutocallTest(TestCase):
+class FlatSampleCovarianceForecastTest(TestCase):
     def setUp(self) -> None:
-        self.__testedCovariance = FlatSampleCovarianceForecast(
-            underlyings=['GAZP', 'YNDX'],
-            observationDate=date(2022, 11, 1),
-            samplelWindowSize=4,
-            market=QuoteProviderStub(),
-            missedQuotesLimit=0.3
-        )
         self.__testedException = FlatSampleCovarianceForecast(
             underlyings=['GAZP', 'YNDX'],
             observationDate=date(2022, 11, 1),
-            samplelWindowSize=4,
-            market=QuoteProviderStub(exception=True),
+            samplelWindowSize=1,
+            market=QuoteProviderStub(),
             missedQuotesLimit=0.3
+        )
+        self.__testedCovariance = FlatSampleCovarianceForecast(
+            underlyings=['GAZP', 'YNDX'],
+            observationDate=date(2022, 11, 1),
+            samplelWindowSize=1,
+            market=QuoteProviderStub(),
+            missedQuotesLimit=1
         )
 
     def testGetObservationDate(self):
@@ -91,20 +76,20 @@ class AutocallTest(TestCase):
 
     def testGetTotalCovariance(self):
         sampleCovarianceMatrix = numpy.array([
-            [0.00082344, -0.00177156],
-            [-0.00177156, 0.01713846]
+            [0.04199522, 0.02084453],
+            [0.02084453, 0.01035972]
         ])
 
         with self.subTest():
             numpy.testing.assert_allclose(
-                sampleCovarianceMatrix,
+                sampleCovarianceMatrix * (1 / 365),
                 self.__testedCovariance.getTotalCovariance(date(2022, 11, 2)),
                 rtol=1e-5
             )
 
         with self.subTest():
             numpy.testing.assert_allclose(
-                sampleCovarianceMatrix * 5,
+                sampleCovarianceMatrix * (7 / 365),
                 self.__testedCovariance.getTotalCovariance(date(2022, 11, 8)),
                 rtol=1e-5
             )
