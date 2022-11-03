@@ -15,26 +15,12 @@ class QuoteProviderStub(QuoteProvider):
             Where key is tha name of a quote and rate is the precentage
             rate in percents.
         """
-        self.__tickerValues = self.__sortTickers(quoteData)
-
-    def __sortTickers(self, quoteData):
-        result = []
-
-        sortOrder = {'D': [], 'W': [], 'M': [], 'Y': []}
+        acceptableDurations = ['D', 'W', 'M', 'Y']
         for quote in quoteData.items():
             durationType = quote[0][-1]
-            sortOrder[durationType].append(quote)
-
-        popKeys = [key for key in sortOrder if len(sortOrder[key]) == 0]
-        [sortOrder.pop(key) for key in popKeys]
-
-        for k in sortOrder.keys():
-            sortOrder[k] = sorted(sortOrder[k], key=lambda x: int(x[0][4:-1]))
-
-        for durQuotes in sortOrder.items():
-            result.extend(durQuotes[1])
-
-        return dict(result)
+            if durationType not in acceptableDurations:
+                raise ValueError('Ticker should end with D, W, M or Y')
+        self.__tickerValues = quoteData
 
     def getTickerValues(self):
         return self.__tickerValues
@@ -48,7 +34,7 @@ class QuoteProviderStub(QuoteProvider):
         if observationDates == [date(2022, 9, 1)]:
             if ticker in self.__tickerValues.keys():
                 return [self.__tickerValues[ticker]]
-            return [None]
+            raise ValueError('No rate for such ticker')
         else:
             raise NotImplementedError()
 
@@ -58,7 +44,7 @@ class VanillaStructuredProductTest(TestCase):
         self.__testedCurve = IndexDiscountCurve(
             valuationDate=date(2022, 9, 1),
             tenors=['1D', '1W', '1M', '1Y'],
-            tickers=["RATE1D", "RATE1W", "RATE1M", "RATE1Y"],
+            tickers=["RATE1Y", "RATE1W", "RATE1M", "RATE1D"],
             market=QuoteProviderStub({
                 'RATE1D': 0.5,
                 'RATE1W': 1.3,
@@ -75,22 +61,22 @@ class VanillaStructuredProductTest(TestCase):
         )
 
     def testSwapQuotes(self):
-        market_1 = QuoteProviderStub({
-                'RATE1D': 0.5,
-                'RATE1W': 1.3,
-                'RATE1M': 1.2,
-                'RATE1Y': 12.9,
+        marketOne = QuoteProviderStub({
+            'RATE1D': 0.5,
+            'RATE1W': 1.3,
+            'RATE1M': 1.2,
+            'RATE1Y': 12.9,
         })
-        market_2 = QuoteProviderStub({
-                'RATE1W': 1.3,
-                'RATE1M': 1.2,
-                'RATE1Y': 12.9,
-                'RATE1D': 0.5,
+        marketTwo = QuoteProviderStub({
+            'RATE1W': 1.3,
+            'RATE1M': 1.2,
+            'RATE1Y': 12.9,
+            'RATE1D': 0.5,
         })
 
         self.assertEqual(
-            market_1.getTickerValues(),
-            market_2.getTickerValues()
+            marketOne.getTickerValues(),
+            marketTwo.getTickerValues()
         )
 
     def testCurveOneTenor(self):
@@ -171,6 +157,35 @@ class VanillaStructuredProductTest(TestCase):
             valuationDate=date(2022, 9, 1),
             tenors=['1D', '1D'],
             tickers=["RATE1D", "RATE1D"],
+            market=QuoteProviderStub({'RATE1D': 1.5}),
+        )
+
+    def testQuoteName(self):
+        self.assertRaises(
+            ValueError,
+            QuoteProviderStub,
+            quoteData={'RATE1B': 1.5},
+        )
+
+    def testTenor(self):
+        self.assertRaises(
+            ValueError,
+            IndexDiscountCurve,
+            valuationDate=date(2022, 9, 1),
+            tenors=['1B'],
+            tickers=["RATE1B"],
+            market=QuoteProviderStub({
+                'RATE1D': 1.5,
+            }),
+        )
+
+    def testMismatch(self):
+        self.assertRaises(
+            ValueError,
+            IndexDiscountCurve,
+            valuationDate=date(2022, 9, 1),
+            tenors=['1D'],
+            tickers=["RATE2D"],
             market=QuoteProviderStub({
                 'RATE1D': 1.5,
             }),

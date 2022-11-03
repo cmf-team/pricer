@@ -22,6 +22,13 @@ class IndexDiscountCurve(DiscountCurve):
         ):
             raise ValueError('Nonunique tickres or tenors')
 
+        tenors = self.__sort(tenors, type='tenors')
+        tickers = self.__sort(tickers, type='tickers')
+
+        for i in range(len(tenors)):
+            if tenors[i] != tickers[i][4:]:
+                raise ValueError('Tenors and tickets durations mismatch')
+
         self.__valuationDate = valuationDate
         self.__durations = self.__tenorToDuration(
             self.__sort(tenors, type='tenors')
@@ -37,6 +44,10 @@ class IndexDiscountCurve(DiscountCurve):
         result = []
         sortOrder = {'D': [], 'W': [], 'M': [], 'Y': []}
         for sample in data:
+            if sample[-1] not in sortOrder:
+                raise ValueError(
+                    'Tenor or ticker should end with D, W, M or Y'
+                )
             sortOrder[sample[-1]].append(sample)
 
         popKeys = [key for key in sortOrder if len(sortOrder[key]) == 0]
@@ -57,7 +68,6 @@ class IndexDiscountCurve(DiscountCurve):
 
     def getDiscountFactor(self, paymentDate: date) -> float:
         timeToPayment = (paymentDate - self.__valuationDate).days / 365
-        rate = 0.
 
         if timeToPayment >= self.__durations[-1]:
             rate = self.__rates[-1]
@@ -66,8 +76,7 @@ class IndexDiscountCurve(DiscountCurve):
         else:
             rate = interp(timeToPayment, self.__durations, self.__rates)
 
-        discountFactor = math.exp(-rate * timeToPayment)
-        return discountFactor
+        return math.exp(-rate * timeToPayment)
 
     def __tenorToDuration(self, tenors: List[str]) -> List:
         durations = []
