@@ -43,8 +43,8 @@ class VanillaStructuredProductTest(TestCase):
     def setUp(self):
         self.__testedCurve = IndexDiscountCurve(
             valuationDate=date(2022, 9, 1),
-            tenors=['1D', '1W', '1M', '1Y'],
-            tickers=["RATE1Y", "RATE1W", "RATE1M", "RATE1D"],
+            tenors=['1D', '1Y', '1M', '1W'],
+            tickers=['RATE1D', 'RATE1Y', 'RATE1M', 'RATE1W'],
             market=QuoteProviderStub({
                 'RATE1D': 0.5,
                 'RATE1W': 1.3,
@@ -174,9 +174,7 @@ class VanillaStructuredProductTest(TestCase):
             valuationDate=date(2022, 9, 1),
             tenors=['1B'],
             tickers=["RATE1B"],
-            market=QuoteProviderStub({
-                'RATE1D': 1.5,
-            }),
+            market=QuoteProviderStub({'RATE1D': 1.5}),
         )
 
     def testMismatch(self):
@@ -186,7 +184,5 @@ class VanillaStructuredProductTest(TestCase):
             valuationDate=date(2022, 9, 1),
             tenors=['1D'],
             tickers=["RATE2D"],
-            market=QuoteProviderStub({
-                'RATE1D': 1.5,
-            }),
+            market=QuoteProviderStub({'RATE1D': 1.5}),
         )
