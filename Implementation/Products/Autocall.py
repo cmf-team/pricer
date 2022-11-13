@@ -50,18 +50,15 @@ class Autocall(CashFlow):
     def __isAutocallBarrierHit(
         self,
         couponDate: date,
-        market: QuoteProvider,
+        market: QuoteProvider
     ) -> bool:
         worstReturn = self.__getWorstReturn(couponDate, market)
-        if worstReturn > self.__autocallBarrier:
-            return True
-        else:
-            return False
+        return worstReturn > self.__autocallBarrier
 
     def __getMemorizedCoupons(
         self,
         paymentDate: date,
-        market: QuoteProvider,
+        market: QuoteProvider
     ) -> float:
         if not self.__memoryFeature:
             return 0

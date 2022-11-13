@@ -103,7 +103,7 @@ package StructuredProductPricer
             +getPaymentAmount(paymentDate: Date, market: QuoteProvider): Real
             +getBasePrice(valuationDate: Date, pricer: Pricer): Real
             -getWorstReturn(paymentDate: Date, market: QuoteProvider): Real
-            -autocallBarrierHit(couponDate: Date, market: QuoteProvider): Boolean
+            -isAutocallBarrierHit(couponDate: Date, market: QuoteProvider): Boolean
             -getMemorizedCoupons(paymentDate: Date, market: QuoteProvider): Real
         }
     }
